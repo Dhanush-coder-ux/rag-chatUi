@@ -23,7 +23,8 @@ export interface Message {
   tools?: ToolUse[];
   streamStatus?: StreamStatus;
   isError?: boolean;
-  
+  confidence?: number;
+  traceId?: string;
 }
 
 export interface Conversation {

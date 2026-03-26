@@ -1,105 +1,76 @@
 import React, { memo, useState, useCallback } from 'react';
 import {
-  Copy, Check, RefreshCw, Search, Globe, BrainCircuit, FileText, User, ChevronDown, ChevronUp, AlertCircle
+  Copy, Check, RefreshCw, Search, Globe, BrainCircuit,
+  FileText, User, ChevronDown, ChevronUp, AlertCircle, ExternalLink,
 } from 'lucide-react';
-import { Message, ToolUse } from '../types';
+import { Message, ToolUse, SourceItem } from '../types';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { copyToClipboard, formatTimestamp } from '../utils';
-import { SourceItem } from '../context/RagContext'; // Updated import for sources
 
-// ── Streaming Cursor ────────────────────────────────────────────────────────
+// ── Streaming Cursor ──────────────────────────────────────────────────────────
 const StreamingCursor = () => (
   <span className="inline-block w-1.5 h-4 ml-1 align-middle bg-zinc-900 dark:bg-zinc-100 animate-pulse" />
 );
 
-// ── Tool Step UI (Real-time AI Thinking) ───────────────────────────────────
+// ── Tool Step ─────────────────────────────────────────────────────────────────
 const ToolIcon: React.FC<{ icon: ToolUse['icon'] }> = ({ icon }) => {
   const cls = 'w-4 h-4';
   if (icon === 'search') return <Search className={cls} />;
-  if (icon === 'web') return <Globe className={cls} />;
+  if (icon === 'web')    return <Globe className={cls} />;
   return <BrainCircuit className={cls} />;
 };
 
 const ToolStep: React.FC<{ tool: ToolUse }> = ({ tool }) => (
   <div className="flex items-center gap-3 py-1.5 text-sm animate-in fade-in slide-in-from-left-2 duration-300">
     <div className={`flex items-center justify-center w-6 h-6 rounded-md ${
-      tool.status === 'running' 
-        ? 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' 
+      tool.status === 'running'
+        ? 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400'
         : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
     }`}>
       <ToolIcon icon={tool.icon} />
     </div>
-    
     <span className={`font-medium ${
       tool.status === 'running' ? 'text-zinc-700 dark:text-zinc-300' : 'text-zinc-500 dark:text-zinc-400'
     }`}>
       {tool.label}
     </span>
-    
     {tool.status === 'running' && (
       <span className="flex gap-1 ml-1">
-        {[0, 1, 2].map((i) => (
-          <span 
-            key={i} 
+        {[0, 1, 2].map(i => (
+          <span
+            key={i}
             className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce"
-            style={{ animationDelay: `${i * 150}ms`, animationDuration: '800ms' }} 
+            style={{ animationDelay: `${i * 150}ms`, animationDuration: '800ms' }}
           />
         ))}
       </span>
     )}
-    
     {tool.status === 'done' && <Check className="w-4 h-4 text-emerald-500 ml-auto" />}
   </div>
 );
 
-// ── Collapsible Sources Panel ────────────────────────────────────────────────
-const SourcesPanel: React.FC<{ sources: SourceItem[] }> = ({ sources }) => {
+// ── Sources Panel — now typed with SourceItem ─────────────────────────────────
+const SourcesPanel: React.FC<{ sources?: SourceItem[] }> = ({ sources }) => {
   const [expanded, setExpanded] = useState(false);
-  
   if (!sources?.length) return null;
 
   return (
     <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 animate-in fade-in duration-500">
-      <button 
-        onClick={() => setExpanded(!expanded)}
+      <button
+        onClick={() => setExpanded(v => !v)}
         className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors w-full"
       >
         <FileText className="w-3.5 h-3.5" />
-        {sources.length} Sources Found
-        {expanded ? <ChevronUp className="w-3.5 h-3.5 ml-auto" /> : <ChevronDown className="w-3.5 h-3.5 ml-auto" />}
+        {sources.length} Source{sources.length > 1 ? 's' : ''} Found
+        {expanded
+          ? <ChevronUp   className="w-3.5 h-3.5 ml-auto" />
+          : <ChevronDown className="w-3.5 h-3.5 ml-auto" />}
       </button>
-      
+
       {expanded && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 animate-in fade-in slide-in-from-top-2 duration-300">
           {sources.map((s, i) => (
-            <div 
-              key={i}
-              className="group flex flex-col gap-1 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-zinc-700/50 cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 max-w-[75%]">
-                  {s.source_type === 'web' ? (
-                    <Globe className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
-                  ) : (
-                    <FileText className="w-4 h-4 text-violet-500 dark:text-violet-400 shrink-0" />
-                  )}
-                  {/* Handle dynamic title or fallback to URL */}
-                  <span className="font-medium text-xs text-zinc-700 dark:text-zinc-200 truncate">
-                    {s.title || s.url || 'Document Source'}
-                  </span>
-                </div>
-                {s.score !== null && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">
-                    {Math.round(s.score * 100)}% Match
-                  </span>
-                )}
-              </div>
-              {s.snippet && (
-                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">
-                  "{s.snippet}"
-                </p>
-              )}
-            </div>
+            <SourceCard key={i} source={s} />
           ))}
         </div>
       )}
@@ -107,20 +78,71 @@ const SourcesPanel: React.FC<{ sources: SourceItem[] }> = ({ sources }) => {
   );
 };
 
-// ── Main MessageBubble ───────────────────────────────────────────────────────
+// ── Source Card — handles both 'document' and 'web' source types ──────────────
+const SourceCard: React.FC<{ source: SourceItem }> = ({ source }) => {
+  const isWeb = source.source_type === 'web';
+
+  const inner = (
+    <div className="group flex flex-col gap-1 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-zinc-700/50">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          {isWeb
+            ? <Globe    className="w-4 h-4 text-sky-500 dark:text-sky-400 shrink-0" />
+            : <FileText className="w-4 h-4 text-violet-500 dark:text-violet-400 shrink-0" />}
+          <span className="font-medium text-xs text-zinc-700 dark:text-zinc-200 truncate">
+            {source.title ?? (isWeb ? source.url : 'Your Document')}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          {source.score != null && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">
+              {Math.round(source.score * 100)}%
+            </span>
+          )}
+          {/* Badge for source type */}
+          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+            isWeb
+              ? 'bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400'
+              : 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400'
+          }`}>
+            {isWeb ? 'Web' : 'Doc'}
+          </span>
+          {isWeb && <ExternalLink className="w-3 h-3 text-zinc-400 group-hover:text-sky-500 transition-colors" />}
+        </div>
+      </div>
+
+      {source.snippet && (
+        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">
+          "{source.snippet}"
+        </p>
+      )}
+    </div>
+  );
+
+  // Web sources are clickable links; doc sources are not
+  return isWeb && source.url ? (
+    <a href={source.url} target="_blank" rel="noopener noreferrer" className="no-underline">
+      {inner}
+    </a>
+  ) : inner;
+};
+
+// ── Main MessageBubble ────────────────────────────────────────────────────────
 interface Props {
-  message: Message;
+  message:       Message;
   onRegenerate?: () => void;
-  isLast?: boolean;
+  isLast?:       boolean;
 }
 
 export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isLast }) => {
-  const [copied, setCopied] = useState(false);
+  const [copied,  setCopied]  = useState(false);
   const [hovered, setHovered] = useState(false);
-  const isUser = message.role === 'user';
+
+  const isUser      = message.role === 'user';
   const isStreaming = message.streamStatus === 'streaming';
-  const showTools = !isUser && message.tools?.length;
-  const isEmpty = !message.content && isStreaming;
+  const showTools   = !isUser && !!message.tools?.length;
+  const isEmpty     = !message.content && isStreaming;
 
   const handleCopy = useCallback(async () => {
     const ok = await copyToClipboard(message.content);
@@ -139,27 +161,27 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
       onMouseLeave={() => setHovered(false)}
     >
       {/* Avatar */}
-      <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg font-medium shadow-sm transition-transform duration-300 ${
+      <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-transform duration-300 ${
         isUser
           ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
           : 'bg-white border border-zinc-200 dark:border-zinc-700 dark:bg-zinc-800'
       }`}>
-        {isUser ? <User className="w-5 h-5" /> : (
-          <img src="/images/vaathi.png" alt="Vaathi AI" className="w-full h-full object-contain p-1.5" />
-        )}
+        {isUser
+          ? <User className="w-5 h-5" />
+          : <img src="/images/vaathi.png" alt="Vaathi AI" className="w-full h-full object-contain p-1.5" />}
       </div>
 
-      {/* Content Container */}
+      {/* Content */}
       <div className={`flex flex-col gap-2 max-w-[85%] sm:max-w-[75%] ${isUser ? 'items-end' : 'items-start'}`}>
-        
-        {/* Tool Status (Only when generating) */}
+
+        {/* Tool steps (only while streaming and no content yet) */}
         {showTools && isStreaming && isEmpty && (
           <div className="flex flex-col gap-1 mb-2">
             {message.tools!.map(t => <ToolStep key={t.id} tool={t} />)}
           </div>
         )}
 
-        {/* Message Bubble Body */}
+        {/* Bubble */}
         <div className={`relative px-5 py-4 text-[15px] leading-relaxed shadow-sm transition-all duration-300
           ${isUser
             ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-3xl rounded-tr-sm'
@@ -167,14 +189,13 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
           }
           ${message.isError ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10' : ''}
         `}>
-          
-          {/* Main Content Area */}
+
           <div className="prose prose-zinc dark:prose-invert max-w-none">
             {isEmpty && !showTools ? (
-              // Simple Typing Indicator if no tools provided
               <div className="flex items-center gap-1.5 h-6">
-                {[0, 1, 2].map((i) => (
-                  <span key={i} className="w-2 h-2 rounded-full bg-zinc-400 dark:bg-zinc-600 animate-bounce" style={{ animationDelay: `${i * 150}ms`, animationDuration: '800ms' }} />
+                {[0, 1, 2].map(i => (
+                  <span key={i} className="w-2 h-2 rounded-full bg-zinc-400 dark:bg-zinc-600 animate-bounce"
+                    style={{ animationDelay: `${i * 150}ms`, animationDuration: '800ms' }} />
                 ))}
               </div>
             ) : isUser ? (
@@ -187,26 +208,42 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
             )}
           </div>
 
-          {/* Sources Section */}
-          {!isUser && !isStreaming && message.sources && <SourcesPanel sources={message.sources} />}
+          {/* Sources — only after streaming finishes */}
+          {!isUser && !isStreaming && <SourcesPanel sources={message.sources} />}
 
-          {/* Error Message */}
+          {/* Confidence badge */}
+          {!isUser && !isStreaming && message.confidence != null && (
+            <div className="mt-3 flex items-center gap-1.5">
+              <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wide">
+                Confidence
+              </span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                message.confidence >= 0.7
+                  ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                  : message.confidence >= 0.4
+                  ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                  : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+              }`}>
+                {Math.round(message.confidence * 100)}%
+              </span>
+            </div>
+          )}
+
           {message.isError && (
-             <div className="flex items-center gap-2 mt-3 text-sm text-red-600 dark:text-red-400 font-medium bg-red-100/50 dark:bg-red-900/20 px-3 py-2 rounded-lg">
-                <AlertCircle className="w-4 h-4" />
-                Response failed to generate. Please try again.
-             </div>
+            <div className="flex items-center gap-2 mt-3 text-sm text-red-600 dark:text-red-400 font-medium bg-red-100/50 dark:bg-red-900/20 px-3 py-2 rounded-lg">
+              <AlertCircle className="w-4 h-4" />
+              Response failed to generate. Please try again.
+            </div>
           )}
         </div>
 
         {/* Action Row */}
         <div className={`flex items-center gap-2 transition-opacity duration-200 ${
-          (hovered && !isStreaming) ? 'opacity-100' : 'opacity-0'
+          hovered && !isStreaming ? 'opacity-100' : 'opacity-0'
         }`}>
           <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500 mr-2">
             {formatTimestamp(message.timestamp)}
           </span>
-          
           <button
             onClick={handleCopy}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
@@ -215,7 +252,6 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
             {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
             <span>{copied ? 'Copied' : 'Copy'}</span>
           </button>
-          
           {!isUser && isLast && onRegenerate && (
             <button
               onClick={onRegenerate}
