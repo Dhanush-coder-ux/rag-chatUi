@@ -1,12 +1,11 @@
+import { SourceItem } from '../context/RagContext';
+
 export type MessageRole = 'user' | 'assistant' | 'system';
 
 export type StreamStatus = 'idle' | 'streaming' | 'done' | 'error';
 
-export interface Source {
-  filename: string;
-  excerpt?: string;
-  score?: number;
-}
+// Re-export for convenience
+export type { SourceItem };
 
 export interface ToolUse {
   id: string;
@@ -20,10 +19,11 @@ export interface Message {
   role: MessageRole;
   content: string;
   timestamp: Date;
-  sources?: Source[];
+  sources?: SourceItem[];
   tools?: ToolUse[];
   streamStatus?: StreamStatus;
   isError?: boolean;
+  
 }
 
 export interface Conversation {

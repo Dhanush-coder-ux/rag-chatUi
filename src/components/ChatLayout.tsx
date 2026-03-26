@@ -1,18 +1,29 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Sidebar } from './Sidebar';
 import { ChatHeader } from './ChatHeader';
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
 import { DropZoneOverlay } from './FileUploadButton';
-import { useChat } from '../context/ChatContext';
+
 import { useFileUpload } from '../hooks/useFileUpload';
+
+import { Message } from '../types';
+import { useRagContext } from '../context/RagContext';
 
 export const ChatLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { activeConversation, regenerateLastResponse } = useChat();
+  
+  const { chatHistory } = useRagContext() 
   const { isDragging, handleDragEnter, handleDragLeave, handleDragOver, handleDrop } = useFileUpload();
 
-  const toggleSidebar = useCallback(() => setSidebarOpen(v => !v), []);
+  // Bridge the gap between backend HistoryMessage and frontend Message
+  const uiMessages = useMemo<Message[]>(() => {
+    return (chatHistory ?? []).map((msg, index) => ({
+      ...msg,
+      id: `msg-${index}`, 
+      timestamp: new Date(), 
+    } as Message));
+  }, [chatHistory]);
 
   return (
     <div
@@ -22,21 +33,19 @@ export const ChatLayout: React.FC = () => {
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      {/* Global drag-and-drop overlay */}
       <DropZoneOverlay visible={isDragging} onDrop={() => {}} />
 
-      {/* Sidebar */}
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar 
+        open={sidebarOpen} 
+        onClose={() => setSidebarOpen(false)} 
+        onOpen={() => setSidebarOpen(true)} 
+      />
 
-      {/* Main panel */}
-      <main className="flex flex-col flex-1 min-w-0 h-full overflow-hidden relative">
-        <ChatHeader onToggleSidebar={toggleSidebar} />
+      <main className="flex flex-col flex-1 min-w-0 h-full overflow-hidden relative transition-all duration-300">
+        <ChatHeader />
 
         <div className="flex flex-col flex-1 overflow-hidden">
-          <MessageList
-            messages={activeConversation?.messages ?? []}
-            onRegenerate={regenerateLastResponse}
-          />
+          <MessageList messages={uiMessages} />
           <ChatInput />
         </div>
       </main>

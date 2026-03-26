@@ -1,13 +1,14 @@
 import React from 'react';
 import { ThemeProvider } from './context/ThemeContext';
-import { ChatProvider } from './context/ChatContext';
+
 import { ChatLayout } from './components/ChatLayout';
+import { RagProvider } from './context/RagContext';
 
 const App: React.FC = () => (
   <ThemeProvider>
-    <ChatProvider>
+    <RagProvider>
       <ChatLayout />
-    </ChatProvider>
+    </RagProvider>
   </ThemeProvider>
 );
 

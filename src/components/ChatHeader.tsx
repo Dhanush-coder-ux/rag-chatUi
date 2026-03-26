@@ -1,64 +1,60 @@
 import React from 'react';
-import { Menu, Sun, Moon, Zap } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { useChat } from '../context/ChatContext';
+import { useRagContext } from '../context/RagContext'; 
 
-interface Props {
-  onToggleSidebar: () => void;
-}
-
-export const ChatHeader: React.FC<Props> = ({ onToggleSidebar }) => {
+export const ChatHeader: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
-  const { activeConversation, state } = useChat();
-  const isStreaming = state.streamStatus === 'streaming';
+  const { isLoading } = useRagContext();
 
-  const title = activeConversation?.title ?? 'RAG Assistant';
+  const title = 'Vaathi';
 
   return (
-    <header className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm z-10">
-      {/* Left */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onToggleSidebar}
-          className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-          aria-label="Toggle sidebar"
-        >
-          <Menu className="w-4.5 h-4.5" />
-        </button>
-
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-teal-500 flex items-center justify-center">
-            <Zap className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+    // The outer div gives the header room to "float" away from the top and sides
+    <div className="p-4 z-10 shrink-0 w-full relative">
+      <header className="flex items-center justify-between px-4 py-2.5 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/50 dark:border-zinc-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] rounded-2xl transition-all">
+        
+        {/* Left: Logo & Title */}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-white dark:bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-100 dark:border-zinc-700 shadow-sm">
+            <img 
+              src="/images/vaathi.png" 
+              alt="Vaathi Logo" 
+              className="w-full h-full object-contain p-0.5" 
+            />
           </div>
-          <h1 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100 truncate max-w-[200px] sm:max-w-xs">
-            {title}
-          </h1>
+          <div className="flex flex-col justify-center">
+            <h1 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
+              {title}
+            </h1>
+            <p className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider -mt-0.5">
+              RAG Engine
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Center: streaming indicator */}
-      <div className="flex items-center gap-2">
-        {isStreaming && (
-          <div className="flex items-center gap-1.5 text-xs text-violet-500 dark:text-violet-400 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-            Generating…
-          </div>
-        )}
-      </div>
+        {/* Center: Mild Streaming Indicator */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none">
+          {isLoading && (
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-violet-50/50 dark:bg-violet-900/20 border border-violet-100/50 dark:border-violet-800/50 backdrop-blur-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-ping" />
+              <span className="text-xs text-violet-600 dark:text-violet-400 font-medium">Thinking</span>
+            </div>
+          )}
+        </div>
 
-      {/* Right */}
-      <div className="flex items-center gap-1">
-        <button
-          onClick={toggleTheme}
-          className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-        >
-          {theme === 'dark'
-            ? <Sun className="w-4 h-4" />
-            : <Moon className="w-4 h-4" />
-          }
-        </button>
-      </div>
-    </header>
+        {/* Right: Theme Toggle */}
+        <div className="flex items-center">
+          <button
+            onClick={toggleTheme}
+            className="w-9 h-9 flex items-center justify-center rounded-xl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-white/50 dark:hover:bg-zinc-800/50 transition-all"
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+        </div>
+
+      </header>
+    </div>
   );
 };

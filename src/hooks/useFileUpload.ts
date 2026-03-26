@@ -1,8 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useChat } from '../context/ChatContext';
-import { generateId } from '../utils';
-
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8000';
+import { useRagContext } from '../context/RagContext'; // Updated import
 
 const ALLOWED_EXTENSIONS = ['.pdf', '.txt', '.md', '.docx'];
 const ALLOWED_MIME = [
@@ -13,7 +10,7 @@ const ALLOWED_MIME = [
 ];
 
 export const useFileUpload = () => {
-  const { addFile, updateFile } = useChat();
+  const { uploadDocument } = useRagContext();
   const [isDragging, setIsDragging] = useState(false);
 
   const isAllowed = (file: File) =>
@@ -27,52 +24,22 @@ export const useFileUpload = () => {
         return;
       }
 
-      const id = generateId();
-      addFile({
-        id,
-        name: file.name,
-        size: file.size,
-        type: file.type || 'application/octet-stream',
-        status: 'uploading',
-        progress: 0,
-        uploadedAt: new Date(),
-      });
-
-      // Simulate incremental progress while uploading
-      let progress = 0;
-      const progressInterval = setInterval(() => {
-        progress = Math.min(progress + Math.random() * 15, 85);
-        updateFile(id, { progress: Math.round(progress) });
-      }, 250);
-
       try {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const res = await fetch(`${API_BASE}/documents/upload`, {
-          method: 'POST',
-          body: formData,
-        });
-
-        clearInterval(progressInterval);
-
-        if (!res.ok) {
-          throw new Error(`Upload failed with status ${res.status}`);
-        }
-
-        updateFile(id, { status: 'done', progress: 100 });
+        // Delegate the actual upload to the RagContext
+        await uploadDocument(file);
       } catch (err) {
-        clearInterval(progressInterval);
         console.error('Upload error:', err);
-        updateFile(id, { status: 'error', progress: 0 });
       }
     },
-    [addFile, updateFile]
+    [uploadDocument]
   );
 
   const uploadFiles = useCallback(
-    (files: FileList | File[]) => {
-      Array.from(files).forEach(uploadFile);
+    async (files: FileList | File[]) => {
+      // Process dropped files sequentially so we don't overwhelm the backend
+      for (const file of Array.from(files)) {
+        await uploadFile(file);
+      }
     },
     [uploadFile]
   );
@@ -102,6 +69,7 @@ export const useFileUpload = () => {
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(false);
+      
       if (e.dataTransfer.files.length > 0) {
         uploadFiles(e.dataTransfer.files);
       }

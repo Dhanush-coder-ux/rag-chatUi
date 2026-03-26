@@ -1,9 +1,6 @@
-import React, { useRef, useCallback, useState } from 'react';
-import { Paperclip, Upload } from 'lucide-react';
-import { useChat } from '../context/ChatContext';
-import { generateId, formatFileSize } from '../utils';
-
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8000';
+import React, { useRef, useCallback } from 'react';
+import { Paperclip, Upload, Loader2 } from 'lucide-react';
+import { useRagContext } from '../context/RagContext'; // Ensure this path matches your project structure
 
 const ALLOWED_TYPES = [
   'application/pdf',
@@ -13,47 +10,27 @@ const ALLOWED_TYPES = [
 ];
 
 export const FileUploadButton: React.FC = () => {
-  const { addFile, updateFile } = useChat();
+  const { uploadDocument, isLoading } = useRagContext();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const uploadFile = useCallback(async (file: File) => {
-    const id = generateId();
-    addFile({
-      id,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      status: 'uploading',
-      progress: 0,
-      uploadedAt: new Date(),
-    });
-
-    // Simulate chunked progress
-    const tick = setInterval(() => {
-      updateFile(id, { progress: Math.min(90, Math.random() * 20 + 70) });
-    }, 200);
-
-    try {
-      const form = new FormData();
-      form.append('file', file);
-      const res = await fetch(`${API_BASE}/documents/upload`, { method: 'POST', body: form });
-      clearInterval(tick);
-      if (!res.ok) throw new Error('Upload failed');
-      updateFile(id, { status: 'done', progress: 100 });
-    } catch {
-      clearInterval(tick);
-      updateFile(id, { status: 'error', progress: 0 });
-    }
-  }, [addFile, updateFile]);
-
-  const handleFiles = useCallback((files: FileList | null) => {
+  const handleFiles = useCallback(async (files: FileList | null) => {
     if (!files) return;
-    Array.from(files).forEach(f => {
-      if (ALLOWED_TYPES.includes(f.type) || f.name.endsWith('.md') || f.name.endsWith('.txt')) {
-        uploadFile(f);
-      }
-    });
-  }, [uploadFile]);
+
+    // Filter to only allow specified types or specific extensions
+    const validFiles = Array.from(files).filter(f => 
+      ALLOWED_TYPES.includes(f.type) || f.name.endsWith('.md') || f.name.endsWith('.txt')
+    );
+
+    // Process uploads sequentially through the context
+    for (const file of validFiles) {
+      await uploadDocument(file);
+    }
+
+    // Reset the input so the user can select the same file again if needed
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+  }, [uploadDocument]);
 
   return (
     <>
@@ -69,11 +46,20 @@ export const FileUploadButton: React.FC = () => {
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="flex items-center justify-center w-9 h-9 rounded-xl text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+        disabled={isLoading}
+        className={`flex items-center justify-center w-9 h-9 rounded-xl transition-colors
+          ${isLoading 
+            ? 'text-zinc-300 dark:text-zinc-600 cursor-not-allowed' 
+            : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+          }`}
         aria-label="Attach file"
         title="Attach file"
       >
-        <Paperclip className="w-4.5 h-4.5" />
+        {isLoading ? (
+          <Loader2 className="w-4.5 h-4.5 animate-spin" />
+        ) : (
+          <Paperclip className="w-4.5 h-4.5" />
+        )}
       </button>
     </>
   );
