@@ -34,7 +34,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
               shrink-0 w-8 h-8 flex items-center justify-center rounded-xl
               text-zinc-500 dark:text-zinc-400
               hover:text-zinc-900 dark:hover:text-zinc-100
-              hover:bg-zinc-100/80 dark:hover:bg-white/8
+          
               transition-all duration-200 hover:scale-105
             "
           >
@@ -50,7 +50,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
               <div
                 className="
                   w-7 h-7 rounded-lg overflow-hidden
-                  bg-gradient-to-br from-violet-500 to-indigo-600
                   border border-violet-400/20 shadow-md shadow-violet-500/20
                   flex items-center justify-center
                 "
@@ -109,7 +108,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
               w-8 h-8 flex items-center justify-center rounded-xl
               text-zinc-500 dark:text-zinc-400
               hover:text-zinc-900 dark:hover:text-zinc-100
-              hover:bg-zinc-100/80 dark:hover:bg-white/8
+       
               transition-all duration-200 hover:scale-105
             "
           >
