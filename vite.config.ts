@@ -7,11 +7,11 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/rag': {
-        target: 'http://localhost:8000',
+        target:"https://rag-app-v1ew.onrender.com",
         changeOrigin: true,
       },
       '/upload': {
-        target: 'http://localhost:8000',
+        target:"https://rag-app-v1ew.onrender.com",
         changeOrigin: true,
       },
     },

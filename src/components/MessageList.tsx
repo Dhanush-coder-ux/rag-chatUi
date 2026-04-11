@@ -2,6 +2,7 @@ import React, { useEffect, useRef, memo, useCallback } from 'react';
 import { Message } from '../types';
 import { MessageBubble } from './MessageBubble';
 import { useRagContext } from '../context/RagContext';
+import { Loader2 } from 'lucide-react';
 
 interface Props {
   messages:      Message[];
@@ -54,11 +55,25 @@ const EmptyState: React.FC = () => (
   </div>
 );
 
+// ── Session Loading State ─────────────────────────────────────────────────────
+const SessionLoadingState: React.FC = () => (
+  <div className="flex flex-col items-center justify-center h-full gap-3 select-none">
+    <div className="relative">
+      <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
+        <Loader2 className="w-5 h-5 text-violet-500 dark:text-violet-400 animate-spin" />
+      </div>
+    </div>
+    <p className="text-sm text-zinc-400 dark:text-zinc-500 font-medium">
+      Loading conversation…
+    </p>
+  </div>
+);
+
 // ── Main MessageList ──────────────────────────────────────────────────────────
 export const MessageList: React.FC<Props> = memo(({ messages, onRegenerate }) => {
-  const { isLoading } = useRagContext();
-  const bottomRef    = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { isLoading, sessionLoading } = useRagContext();
+  const bottomRef     = useRef<HTMLDivElement>(null);
+  const containerRef  = useRef<HTMLDivElement>(null);
   const scrolledUpRef = useRef(false);
 
   const handleScroll = useCallback(() => {
@@ -75,13 +90,23 @@ export const MessageList: React.FC<Props> = memo(({ messages, onRegenerate }) =>
     }
   }, [messages, isLoading]);
 
-  // When conversation clears, scroll to top
+  // When session switches, scroll to bottom to show latest messages
+  useEffect(() => {
+    scrolledUpRef.current = false;
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'instant' });
+    });
+  }, [messages.length === 0]);  // fires when messages reset on session switch
+
+  // When conversation clears, reset scroll position
   useEffect(() => {
     if (messages.length === 0) {
       scrolledUpRef.current = false;
-      bottomRef.current?.scrollIntoView({ behavior: 'instant' });
     }
   }, [messages.length]);
+
+  // Show spinner while fetching a session's history — not the empty state
+  if (sessionLoading) return <SessionLoadingState />;
 
   if (messages.length === 0 && !isLoading) return <EmptyState />;
 

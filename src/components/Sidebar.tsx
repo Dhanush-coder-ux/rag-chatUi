@@ -1,8 +1,8 @@
 // components/Sidebar.tsx
 import React, { memo, useState, useRef, useEffect, useCallback } from 'react';
 import {
-  Plus, Trash, MessageSquare, FileText, X, Loader2,
-  MoreHorizontal, Pin, Share,
+  Plus, Trash, MessageSquare, FileText,
+  Loader2, MoreHorizontal, Pin, Share,
   PanelLeftClose, ChevronDown,
   FileSpreadsheet, Image as ImageIcon, File, Sparkles, Database,
   BookOpen,
@@ -10,7 +10,6 @@ import {
 import { useRagContext, ChatSession } from '../context/RagContext';
 import { formatFileSize } from '../utils';
 
-// ── Outside click hook ────────────────────────────────────────────────────────
 function useOutsideClick(ref: React.RefObject<HTMLElement>, callback: () => void) {
   useEffect(() => {
     function handle(e: MouseEvent) {
@@ -21,9 +20,8 @@ function useOutsideClick(ref: React.RefObject<HTMLElement>, callback: () => void
   }, [ref, callback]);
 }
 
-// ── File icon helper ──────────────────────────────────────────────────────────
 const getFileIcon = (filename: string) => {
-  const ext = filename?.split('.').pop()?.toLowerCase() || '';
+  const ext = filename?.split('.').pop()?.toLowerCase() ?? '';
   if (['xls', 'xlsx', 'csv'].includes(ext))
     return <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />;
   if (ext === 'pdf')
@@ -35,7 +33,6 @@ const getFileIcon = (filename: string) => {
   return <File className="w-3.5 h-3.5 text-zinc-400" />;
 };
 
-// ── File entry ────────────────────────────────────────────────────────────────
 const FileEntry: React.FC<{ file: any; onRemove: () => void }> = ({ file, onRemove }) => {
   const filename = file.name || file.filename || `Document #${file.id}`;
   return (
@@ -67,18 +64,18 @@ const FileEntry: React.FC<{ file: any; onRemove: () => void }> = ({ file, onRemo
   );
 };
 
-// ── Chat item ─────────────────────────────────────────────────────────────────
 interface ChatItemProps {
   session:   ChatSession;
   isActive:  boolean;
+  isLoading: boolean;           // true while this session's messages are loading
   onSelect:  () => void;
   onDelete:  () => void;
 }
 
-const ChatItem: React.FC<ChatItemProps> = ({ session, isActive, onSelect, onDelete }) => {
+const ChatItem: React.FC<ChatItemProps> = ({ session, isActive, isLoading, onSelect, onDelete }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  useOutsideClick(menuRef, () => setMenuOpen(false));
+  useOutsideClick(menuRef as React.RefObject<HTMLElement>, () => setMenuOpen(false));
 
   return (
     <div
@@ -93,9 +90,13 @@ const ChatItem: React.FC<ChatItemProps> = ({ session, isActive, onSelect, onDele
       <div className="flex items-center gap-2.5 flex-1 min-w-0">
         <div className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center
           ${isActive ? 'bg-violet-100 dark:bg-violet-500/20' : 'bg-zinc-100 dark:bg-white/5'}`}>
-          <MessageSquare className={`w-3.5 h-3.5 ${isActive
-            ? 'text-violet-500 dark:text-violet-400'
-            : 'text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-500 dark:group-hover:text-zinc-400'}`} />
+          {/* Show spinner in the icon slot while loading this session */}
+          {isActive && isLoading
+            ? <Loader2 className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400 animate-spin" />
+            : <MessageSquare className={`w-3.5 h-3.5 ${isActive
+                ? 'text-violet-500 dark:text-violet-400'
+                : 'text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-500 dark:group-hover:text-zinc-400'}`} />
+          }
         </div>
         <p className="text-xs truncate font-medium">{session.title}</p>
       </div>
@@ -148,14 +149,53 @@ const ChatItem: React.FC<ChatItemProps> = ({ session, isActive, onSelect, onDele
   );
 };
 
-// ── Section label ─────────────────────────────────────────────────────────────
 const SectionLabel: React.FC<{ label: string }> = ({ label }) => (
   <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-600 px-3 pt-4 pb-2 select-none">
     {label}
   </p>
 );
 
-// ── Main Sidebar ──────────────────────────────────────────────────────────────
+const SessionListContent: React.FC<{
+  sessions:      ChatSession[];
+  sessionId:     number | null;
+  isLoading:     boolean;
+  sessionLoading: boolean;
+  onSelect:      (id: number) => void;
+  onDelete:      (id: number) => void;
+}> = ({ sessions, sessionId, isLoading, sessionLoading, onSelect, onDelete }) => {
+  if (isLoading && sessions.length === 0) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-2">
+        <Loader2 className="w-3 h-3 animate-spin text-violet-400" />
+        <span className="text-[11px] text-zinc-400">Loading…</span>
+      </div>
+    );
+  }
+
+  if (sessions.length === 0) {
+    return (
+      <p className="text-[11px] text-zinc-400 dark:text-zinc-600 px-3 py-2">
+        No conversations yet
+      </p>
+    );
+  }
+
+  return (
+    <>
+      {sessions.map(session => (
+        <ChatItem
+          key={session.id}
+          session={session}
+          isActive={session.id === sessionId}
+          isLoading={sessionLoading && session.id === sessionId}
+          onSelect={() => onSelect(session.id)}
+          onDelete={() => onDelete(session.id)}
+        />
+      ))}
+    </>
+  );
+};
+
 interface Props {
   open:    boolean;
   onClose: () => void;
@@ -166,34 +206,43 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen }) => {
   const {
     documents, deleteDocument, fetchDocuments,
     sessions, fetchSessions, createSession, deleteSession, switchSession,
-    sessionId, clearHistory,
+    sessionId, sessionLoading, clearHistory,
     isLoading,
   } = useRagContext();
 
   const [sourcesOpen, setSourcesOpen] = useState(false);
 
-  // Fetch both on mount
   useEffect(() => {
     fetchDocuments();
     fetchSessions();
   }, [fetchDocuments, fetchSessions]);
+const [creating, setCreating] = useState(false);
 
-  const handleNewChat = useCallback(async () => {
-    clearHistory();                // reset active session + history in context
-    await createSession();         // immediately create + set new session
-  }, [clearHistory, createSession]);
+const handleNewChat = useCallback(async () => {
+  if (creating) return; // ✅ prevent spam
+
+  setCreating(true);
+  clearHistory();
+  await createSession();
+  setCreating(false);
+
+}, [clearHistory, createSession, creating]);
 
   const handleDeleteSession = useCallback(async (id: number) => {
     await deleteSession(id);
-    // If no sessions left, create a fresh one
     if (sessions.length <= 1) {
       await createSession();
     }
   }, [deleteSession, sessions.length, createSession]);
 
+  // switchSession is now async — it fetches messages from the API
+  const handleSelectSession = useCallback(async (id: number) => {
+    if (id === sessionId) return;   // already active, no-op
+    await switchSession(id);
+  }, [switchSession, sessionId]);
+
   return (
     <>
-      {/* Mobile backdrop */}
       {open && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 lg:hidden transition-opacity"
@@ -201,11 +250,9 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen }) => {
         />
       )}
 
-      {/* Desktop layout spacer */}
       <div className={`hidden lg:block shrink-0 transition-[width] duration-300
         ease-[cubic-bezier(0.4,0,0.2,1)] ${open ? 'w-[272px]' : 'w-0'}`} />
 
-      {/* Sidebar panel */}
       <aside className={`
         fixed top-0 left-0 h-full z-30 flex flex-col w-[272px]
         bg-zinc-50 dark:bg-[#111113]
@@ -213,7 +260,6 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen }) => {
         transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
         ${open ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        {/* Gradient mesh */}
         <div className="absolute top-0 inset-x-0 h-48 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(139,92,246,0.12) 0%, transparent 70%)' }} />
 
@@ -229,10 +275,13 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen }) => {
               <span className="text-[10px] text-zinc-400 dark:text-zinc-500 leading-none mt-0.5 block">AI Research Assistant</span>
             </div>
           </div>
-          <button onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 dark:text-zinc-600
-              hover:text-zinc-700 dark:hover:text-zinc-300"
-            aria-label="Close sidebar">
+          <button
+            onClick={onClose}
+            title="Close sidebar"
+            className="p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500
+              hover:text-zinc-700 dark:hover:text-zinc-200
+              hover:bg-zinc-200 dark:hover:bg-white/10 transition-colors"
+          >
             <PanelLeftClose className="w-4 h-4" />
           </button>
         </div>
@@ -241,6 +290,7 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen }) => {
         <div className="relative px-3 pb-3 shrink-0">
           <button
             onClick={handleNewChat}
+            disabled={creating}
             className="group flex items-center justify-between w-full px-4 py-3 rounded-xl
               bg-gradient-to-r from-violet-600 to-indigo-600
               hover:from-violet-500 hover:to-indigo-500
@@ -263,29 +313,14 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen }) => {
         <div className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5 scrollbar-thin
           scrollbar-thumb-zinc-300 dark:scrollbar-thumb-white/10 scrollbar-track-transparent">
           <SectionLabel label="Recent" />
-
-          {sessions.length === 0 && !isLoading && (
-            <p className="text-[11px] text-zinc-400 dark:text-zinc-600 px-3 py-2">
-              No conversations yet
-            </p>
-          )}
-
-          {isLoading && sessions.length === 0 && (
-            <div className="flex items-center gap-2 px-3 py-2">
-              <Loader2 className="w-3 h-3 animate-spin text-violet-400" />
-              <span className="text-[11px] text-zinc-400">Loading...</span>
-            </div>
-          )}
-
-          {sessions.map(session => (
-            <ChatItem
-              key={session.id}
-              session={session}
-              isActive={session.id === sessionId}
-              onSelect={() => switchSession(session.id)}
-              onDelete={() => handleDeleteSession(session.id)}
-            />
-          ))}
+          <SessionListContent
+            sessions={sessions}
+            sessionId={sessionId}
+            isLoading={isLoading}
+            sessionLoading={sessionLoading}
+            onSelect={handleSelectSession}
+            onDelete={handleDeleteSession}
+          />
         </div>
 
         {/* Knowledge Base */}

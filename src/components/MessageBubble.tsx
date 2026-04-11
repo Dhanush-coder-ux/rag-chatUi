@@ -117,6 +117,13 @@ const SourceCard: React.FC<{ source: SourceItem }> = ({ source }) => {
           "{source.snippet}"
         </p>
       )}
+      {source.image && (
+  <img
+    src={source.image}
+    alt={source.title || "preview"}
+    className="w-full h-28 object-cover rounded-lg mb-2"
+  />
+)}
     </div>
   );
 
