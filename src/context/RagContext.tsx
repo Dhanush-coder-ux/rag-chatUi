@@ -10,6 +10,7 @@ import { Message } from '../types';
 // ── Enums / literals ──────────────────────────────────────────────────────────
 export type RagMode = 'documents' | 'web' | 'hybrid';
 export type ToolUsed = 'document' | 'web' | 'hybrid' | 'none';
+export type LlmModel = 'auto' | 'gemini' | 'llama3'; // ✨ Added model type
 
 export interface HistoryMessage {
   role: 'user' | 'assistant';
@@ -57,7 +58,6 @@ export interface ChatSession {
   updated_at: string;
 }
 
-// Shape returned by GET /chat/{id}/messages
 interface ApiMessage {
   id: number;
   role: 'user' | 'assistant';
@@ -79,45 +79,44 @@ export interface StreamCallbacks {
 
 interface RagContextType {
   documents: Document[];
-  chatHistory: HistoryMessage[];   // raw role/content pairs sent to the API
-  messages: Message[];          // rich UI messages rendered in MessageList
+  chatHistory: HistoryMessage[];
+  messages: Message[];
   isLoading: boolean;
-  sessionLoading: boolean;            // true only while fetching a past session
+  sessionLoading: boolean;
   error: string | null;
   mode: RagMode;
+  model: LlmModel; // ✨ Exposed model
   sessionId: number | null;
   sessions: ChatSession[];
 
   setMode: (mode: RagMode) => void;
+  setModel: (model: LlmModel) => void; // ✨ Exposed setModel
   clearHistory: () => void;
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;  // lets ChatInput append streaming msgs
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 
-  // Session API
   fetchSessions: () => Promise<void>;
   createSession: () => Promise<number | null>;
   deleteSession: (id: number) => Promise<void>;
-  switchSession: (id: number) => Promise<void>;  // now async — fetches history
+  switchSession: (id: number) => Promise<void>;
 
-  // Document API
   fetchDocuments: () => Promise<void>;
   uploadDocument: (file: File) => Promise<TaskResponse | null>;
   deleteDocument: (id: number) => Promise<void>;
 
-  // RAG API
   askQuestion: (question: string) => Promise<RagResponse | null>;
   askQuestionStream: (question: string, cbs: StreamCallbacks) => Promise<void>;
 }
 
-const API_BASE = 'https://rag-app-v1ew.onrender.com';
+// const API_BASE = 'https://rag-app-v1ew.onrender.com';
+const API_BASE = 'http://localhost:8000';
+
 const RagContext = createContext<RagContextType | undefined>(undefined);
 
 function apiMsgToUiMsg(m: ApiMessage): Message {
   let content = m.content || '';
   let sources: SourceItem[] = [];
 
-  // Clean backend SSE metadata if present
   if (m.role === 'assistant' && content.includes('event:')) {
-    // 1. Extract sources safely
     const sourcesMatch = content.match(/event:\s*sources\s*\n?data:\s*(\[[\s\S]*?\])(?=\s*event:|$)/);
     if (sourcesMatch && sourcesMatch[1]) {
       try {
@@ -127,18 +126,15 @@ function apiMsgToUiMsg(m: ApiMessage): Message {
       }
     }
 
-    // 2. Remove the blocks STRICTLY using lookaheads so it doesn't eat the next word
     content = content
       .replace(/event:\s*trace\s*\n?data:\s*[a-f0-9\-]+(?=\s*event:|$)/g, '')
       .replace(/event:\s*mode\s*\n?data:\s*[a-z]+(?=\s*event:|$)/gi, '')
       .replace(/event:\s*tool_used\s*\n?data:\s*[a-z]+(?=\s*event:|$)/gi, '')
-      // ✨ FIXED REGEX: Matches step data up to the end of the line, with or without quotes
       .replace(/event:\s*step\s*\n?data:\s*[^\n]+(?=\s*event:|$)/g, '')
       .replace(/event:\s*sources\s*\n?data:\s*\[[\s\S]*?\](?=\s*event:|$)/g, '')
-      .replace(/^event:\s*$/gm, '') // cleanup any orphaned event lines
+      .replace(/^event:\s*$/gm, '')
       .trim();
   }
-  console.log("Cleaned UI content:", content);
 
   return {
     id: String(m.id),
@@ -161,10 +157,10 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
   const [sessionLoading, setSessionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<RagMode>('hybrid');
+  const [model, setModel] = useState<LlmModel>('auto'); // ✨ Added model state
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
 
-  // ── helpers ────────────────────────────────────────────────────────────────
   const apiFetch = useCallback(async (path: string, init?: RequestInit): Promise<Response> => {
     const res = await fetch(`${API_BASE}${path}`, init);
     if (!res.ok) {
@@ -174,7 +170,6 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     return res;
   }, []);
 
-  // ── Sessions ───────────────────────────────────────────────────────────────
   const fetchSessions = useCallback(async () => {
     try {
       const res = await apiFetch('/chat/');
@@ -191,7 +186,7 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
 
       setSessions(prev => {
         const exists = prev.some(s => s.id === data.id);
-        if (exists) return prev; // ✅ don't add duplicate
+        if (exists) return prev;
         return [data, ...prev];
       });
 
@@ -218,13 +213,7 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [apiFetch, sessionId]);
 
-  /**
-   * Switch to a session and load its message history from the API.
-   * Shows a loading state only in the message area (sessionLoading),
-   * not the global isLoading, so the sidebar stays interactive.
-   */
   const switchSession = useCallback(async (id: number) => {
-    // Optimistically update active session so sidebar highlights immediately
     setSessionId(id);
     setChatHistory([]);
     setMessages([]);
@@ -235,11 +224,9 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
       const res = await apiFetch(`/chat/${id}/messages`);
       const data: ApiMessage[] = await res.json();
 
-      // Convert API messages → UI messages (This cleans the SSE metadata!)
       const uiMessages = data.map(apiMsgToUiMsg);
       setMessages(uiMessages);
 
-      // CRITICAL FIX: Rebuild chatHistory using the CLEAN uiMessages content.
       setChatHistory(uiMessages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err));
@@ -260,7 +247,6 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     return createSession();
   }, [sessionId, createSession]);
 
-  // ── Documents ──────────────────────────────────────────────────────────────
   const fetchDocuments = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -305,7 +291,6 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [apiFetch]);
 
-  // ── RAG: non-streaming ─────────────────────────────────────────────────────
   const askQuestion = useCallback(async (question: string): Promise<RagResponse | null> => {
     setIsLoading(true);
     setError(null);
@@ -314,7 +299,8 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
       const res = await apiFetch('/rag/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, history: chatHistory, mode, session_id: sid }),
+        // ✨ Included model in the payload
+        body: JSON.stringify({ question, history: chatHistory, mode, model, session_id: sid }),
       });
       const data: RagResponse = await res.json();
 
@@ -329,9 +315,8 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [apiFetch, chatHistory, ensureSession, fetchSessions, mode, sessionId]);
+  }, [apiFetch, chatHistory, ensureSession, fetchSessions, mode, model, sessionId]);
 
-  // ── RAG: streaming ─────────────────────────────────────────────────────────
   const askQuestionStream = useCallback(async (
     question: string,
     cbs: StreamCallbacks,
@@ -345,7 +330,8 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
       const res = await apiFetch('/rag/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, history: chatHistory, mode, session_id: sid }),
+        // ✨ Included model in the payload
+        body: JSON.stringify({ question, history: chatHistory, mode, model, session_id: sid }),
       });
 
       if (!res.body) throw new Error('No response body');
@@ -412,13 +398,13 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [apiFetch, chatHistory, ensureSession, fetchSessions, mode]);
+  }, [apiFetch, chatHistory, ensureSession, fetchSessions, mode, model]);
 
   return (
     <RagContext.Provider value={{
       documents, chatHistory, messages, isLoading, sessionLoading, error,
-      mode, sessionId, sessions,
-      setMode, clearHistory, setMessages,
+      mode, model, sessionId, sessions,
+      setMode, setModel, clearHistory, setMessages,
       fetchSessions, createSession, deleteSession, switchSession,
       fetchDocuments, uploadDocument, deleteDocument,
       askQuestion, askQuestionStream,
