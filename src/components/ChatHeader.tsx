@@ -17,10 +17,10 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
       <header
         className="
           flex items-center justify-between px-3 py-2.5
-          bg-white/60 dark:bg-zinc-900/60
+          bg-background/80
           backdrop-blur-2xl
-          border border-white/60 dark:border-white/8
-          shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.35)]
+          border border-border/40
+          shadow-premium dark:shadow-premium-dark
           rounded-2xl transition-all duration-300
         "
       >
@@ -32,9 +32,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
             aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
             className="
               shrink-0 w-8 h-8 flex items-center justify-center rounded-xl
-              text-zinc-500 dark:text-zinc-400
-              hover:text-zinc-900 dark:hover:text-zinc-100
-          
+              text-muted-foreground
+              hover:text-foreground
               transition-all duration-200 hover:scale-105
             "
           >
@@ -61,10 +60,10 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
                 />
               </div>
               <div className="flex flex-col leading-none">
-                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+                <span className="text-sm font-bold text-foreground tracking-tight">
                   Vaathi
                 </span>
-                <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest mt-0.5">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mt-0.5">
                   RAG Engine
                 </span>
               </div>
@@ -84,15 +83,15 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
               "
             >
               <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-violet-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/75" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
               </span>
-              <span className="text-xs text-violet-600 dark:text-violet-400 font-medium">
+              <span className="text-xs text-primary font-medium">
                 Thinking…
               </span>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 text-zinc-400 dark:text-zinc-600 select-none">
+            <div className="flex items-center gap-1.5 text-muted-foreground select-none">
               <Sparkles className="w-3 h-3" />
               <span className="text-xs font-medium">Ask anything</span>
             </div>
@@ -106,9 +105,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             className="
               w-8 h-8 flex items-center justify-center rounded-xl
-              text-zinc-500 dark:text-zinc-400
-              hover:text-zinc-900 dark:hover:text-zinc-100
-       
+              text-muted-foreground
+              hover:text-foreground
               transition-all duration-200 hover:scale-105
             "
           >

@@ -83,19 +83,19 @@ const ChatItem: React.FC<ChatItemProps> = ({ session, isActive, isLoading, onSel
       className={`group relative flex items-center justify-between px-3 py-2.5 rounded-xl
         cursor-pointer transition-all duration-200
         ${isActive
-          ? 'bg-violet-50 dark:bg-violet-500/15 border border-violet-200 dark:border-violet-500/25 text-zinc-800 dark:text-zinc-100'
-          : 'border border-transparent text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-700 dark:hover:text-zinc-200 hover:border-zinc-200 dark:hover:border-white/8'
+          ? 'bg-primary/10 border border-primary/20 text-foreground'
+          : 'border border-transparent text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border'
         }`}
     >
       <div className="flex items-center gap-2.5 flex-1 min-w-0">
         <div className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center
-          ${isActive ? 'bg-violet-100 dark:bg-violet-500/20' : 'bg-zinc-100 dark:bg-white/5'}`}>
+          ${isActive ? 'bg-primary/20' : 'bg-muted'}`}>
           {/* Show spinner in the icon slot while loading this session */}
           {isActive && isLoading
-            ? <Loader2 className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400 animate-spin" />
+            ? <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
             : <MessageSquare className={`w-3.5 h-3.5 ${isActive
-                ? 'text-violet-500 dark:text-violet-400'
-                : 'text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-500 dark:group-hover:text-zinc-400'}`} />
+                ? 'text-primary'
+                : 'text-muted-foreground group-hover:text-foreground'}`} />
           }
         </div>
         <p className="text-xs truncate font-medium">{session.title}</p>
@@ -105,8 +105,8 @@ const ChatItem: React.FC<ChatItemProps> = ({ session, isActive, isLoading, onSel
         onClick={e => { e.stopPropagation(); setMenuOpen(o => !o); }}
         className={`shrink-0 p-1.5 rounded-lg transition-all
           ${menuOpen
-            ? 'opacity-100 bg-zinc-200 dark:bg-white/10 text-zinc-700 dark:text-zinc-200'
-            : 'opacity-0 group-hover:opacity-100 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-700 dark:hover:text-zinc-200'
+            ? 'opacity-100 bg-muted text-foreground'
+            : 'opacity-0 group-hover:opacity-100 text-muted-foreground hover:bg-muted hover:text-foreground'
           }`}
       >
         <MoreHorizontal className="w-3.5 h-3.5" />
@@ -117,9 +117,9 @@ const ChatItem: React.FC<ChatItemProps> = ({ session, isActive, isLoading, onSel
           ref={menuRef}
           onClick={e => e.stopPropagation()}
           className="absolute right-2 top-10 w-44 py-1.5 rounded-xl z-50
-            bg-white dark:bg-[#1a1b1e]
-            border border-zinc-200 dark:border-white/10
-            shadow-xl dark:shadow-2xl dark:shadow-black/50
+            bg-popover
+            border border-border
+            shadow-xl
             backdrop-blur-xl flex flex-col text-xs overflow-hidden"
         >
           <button className="flex items-center gap-2 px-3 py-2
@@ -150,7 +150,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ session, isActive, isLoading, onSel
 };
 
 const SectionLabel: React.FC<{ label: string }> = ({ label }) => (
-  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-600 px-3 pt-4 pb-2 select-none">
+  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-3 pt-4 pb-2 select-none">
     {label}
   </p>
 );
@@ -255,8 +255,8 @@ const handleNewChat = useCallback(async () => {
 
       <aside className={`
         fixed top-0 left-0 h-full z-30 flex flex-col w-[272px]
-        bg-zinc-50 dark:bg-[#111113]
-        border-r border-zinc-200 dark:border-none
+        bg-card
+        border-r border-border
         transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
         ${open ? 'translate-x-0' : '-translate-x-full'}
       `}>
@@ -278,9 +278,9 @@ const handleNewChat = useCallback(async () => {
           <button
             onClick={onClose}
             title="Close sidebar"
-            className="p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500
-              hover:text-zinc-700 dark:hover:text-zinc-200
-              hover:bg-zinc-200 dark:hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-muted-foreground
+              hover:text-foreground
+              hover:bg-muted transition-colors"
           >
             <PanelLeftClose className="w-4 h-4" />
           </button>
@@ -292,12 +292,12 @@ const handleNewChat = useCallback(async () => {
             onClick={handleNewChat}
             disabled={creating}
             className="group flex items-center justify-between w-full px-4 py-3 rounded-xl
-              bg-gradient-to-r from-violet-600 to-indigo-600
-              hover:from-violet-500 hover:to-indigo-500
-              text-white font-semibold text-sm
-              shadow-lg shadow-violet-500/20
-              transition-all duration-200 hover:shadow-violet-500/30 hover:scale-[1.01]
-              border border-violet-500/30"
+              bg-gradient-to-r from-primary to-purple-600
+              hover:from-primary/90 hover:to-purple-600/90
+              text-primary-foreground font-semibold text-sm
+              shadow-lg shadow-primary/20
+              transition-all duration-200 hover:shadow-primary/30 hover:scale-[1.01]
+              border border-primary/30"
           >
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 opacity-80" />
@@ -324,7 +324,7 @@ const handleNewChat = useCallback(async () => {
         </div>
 
         {/* Knowledge Base */}
-        <div className="border-t border-zinc-200 dark:border-none flex flex-col shrink-0">
+        <div className="border-t border-border flex flex-col shrink-0">
           <button
             onClick={() => setSourcesOpen(o => !o)}
             className="flex items-center justify-between w-full px-4 py-3.5 transition-colors group"

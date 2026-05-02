@@ -49,8 +49,8 @@ export const FileUploadButton: React.FC = () => {
         disabled={isLoading}
         className={`flex items-center justify-center w-9 h-9 rounded-xl transition-colors
           ${isLoading 
-            ? 'text-zinc-300 dark:text-zinc-600 cursor-not-allowed' 
-            : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            ? 'text-muted-foreground/50 cursor-not-allowed' 
+            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
           }`}
         aria-label="Attach file"
         title="Attach file"
@@ -74,12 +74,12 @@ export const DropZoneOverlay: React.FC<{
   if (!visible) return null;
   return (
     <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-4
-      bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm rounded-2xl
-      border-2 border-dashed border-violet-400 dark:border-violet-500
+      bg-background/80 backdrop-blur-sm rounded-2xl
+      border-2 border-dashed border-primary
       transition-all pointer-events-none"
     >
-      <Upload className="w-10 h-10 text-violet-500" />
-      <p className="text-sm font-medium text-violet-600 dark:text-violet-400">
+      <Upload className="w-10 h-10 text-primary" />
+      <p className="text-sm font-medium text-primary">
         Drop files to upload
       </p>
     </div>

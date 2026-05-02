@@ -24,13 +24,13 @@ const ToolStep: React.FC<{ tool: ToolUse }> = ({ tool }) => (
   <div className="flex items-center gap-3 py-1.5 text-sm animate-in fade-in slide-in-from-left-2 duration-300">
     <div className={`flex items-center justify-center w-6 h-6 rounded-md ${
       tool.status === 'running'
-        ? 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400'
-        : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
+        ? 'bg-primary/10 text-primary'
+        : 'bg-emerald-500/10 text-emerald-500'
     }`}>
       <ToolIcon icon={tool.icon} />
     </div>
     <span className={`font-medium ${
-      tool.status === 'running' ? 'text-zinc-700 dark:text-zinc-300' : 'text-zinc-500 dark:text-zinc-400'
+      tool.status === 'running' ? 'text-foreground' : 'text-muted-foreground'
     }`}>
       {tool.label}
     </span>
@@ -55,10 +55,10 @@ const SourcesPanel: React.FC<{ sources?: SourceItem[] }> = ({ sources }) => {
   if (!sources?.length) return null;
 
   return (
-    <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 animate-in fade-in duration-500">
+    <div className="mt-4 pt-4 border-t border-border/50 animate-in fade-in duration-500">
       <button
         onClick={() => setExpanded(v => !v)}
-        className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors w-full"
+        className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors w-full"
       >
         <FileText className="w-3.5 h-3.5" />
         {sources.length} Source{sources.length > 1 ? 's' : ''} Found
@@ -83,32 +83,32 @@ const SourceCard: React.FC<{ source: SourceItem }> = ({ source }) => {
   const isWeb = source.source_type === 'web';
 
   const inner = (
-    <div className="group flex flex-col gap-1 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-zinc-700/50">
+    <div className="group flex flex-col gap-1 p-3 rounded-xl bg-card hover:bg-muted transition-all border border-border shadow-sm hover:shadow-md">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           {isWeb
-            ? <Globe    className="w-4 h-4 text-sky-500 dark:text-sky-400 shrink-0" />
-            : <FileText className="w-4 h-4 text-violet-500 dark:text-violet-400 shrink-0" />}
-          <span className="font-medium text-xs text-zinc-700 dark:text-zinc-200 truncate">
+            ? <Globe    className="w-4 h-4 text-sky-500 shrink-0" />
+            : <FileText className="w-4 h-4 text-primary shrink-0" />}
+          <span className="font-medium text-xs text-foreground truncate">
             {source.title ?? (isWeb ? source.url : 'Your Document')}
           </span>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
           {source.score != null && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
               {Math.round(source.score * 100)}%
             </span>
           )}
           {/* Badge for source type */}
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
             isWeb
-              ? 'bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400'
-              : 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400'
+              ? 'bg-sky-500/10 text-sky-500'
+              : 'bg-primary/10 text-primary'
           }`}>
             {isWeb ? 'Web' : 'Doc'}
           </span>
-          {isWeb && <ExternalLink className="w-3 h-3 text-zinc-400 group-hover:text-sky-500 transition-colors" />}
+          {isWeb && <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-sky-500 transition-colors" />}
         </div>
       </div>
 
@@ -170,8 +170,8 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
       {/* Avatar */}
       <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-transform duration-300 ${
         isUser
-          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
-          : 'bg-white border border-zinc-200 dark:border-zinc-700 dark:bg-zinc-800'
+          ? 'bg-primary text-primary-foreground'
+          : 'bg-card border border-border shadow-premium dark:shadow-premium-dark'
       }`}>
         {isUser
           ? <User className="w-5 h-5" />
@@ -191,10 +191,10 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
         {/* Bubble */}
         <div className={`relative px-5 py-4 text-[15px] leading-relaxed shadow-sm transition-all duration-300
           ${isUser
-            ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-3xl rounded-tr-sm'
-            : 'bg-white dark:bg-zinc-900/50 text-zinc-800 dark:text-zinc-100 rounded-3xl rounded-tl-sm border border-zinc-200/50 dark:border-zinc-800/50 backdrop-blur-sm'
+            ? 'bg-muted text-foreground rounded-3xl rounded-tr-sm'
+            : 'bg-card text-foreground rounded-3xl rounded-tl-sm border border-border/50 shadow-premium dark:shadow-premium-dark'
           }
-          ${message.isError ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10' : ''}
+          ${message.isError ? 'border-destructive/50 bg-destructive/10' : ''}
         `}>
 
           <div className="prose prose-zinc dark:prose-invert max-w-none">
@@ -248,12 +248,12 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
         <div className={`flex items-center gap-2 transition-opacity duration-200 ${
           hovered && !isStreaming ? 'opacity-100' : 'opacity-0'
         }`}>
-          <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500 mr-2">
+          <span className="text-xs font-medium text-muted-foreground mr-2">
             {formatTimestamp(message.timestamp)}
           </span>
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             aria-label="Copy message"
           >
             {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
@@ -262,7 +262,7 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
           {!isUser && isLast && onRegenerate && (
             <button
               onClick={onRegenerate}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               aria-label="Regenerate response"
             >
               <RefreshCw className="w-4 h-4" />

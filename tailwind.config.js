@@ -1,17 +1,57 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: ['class'],
   content: ['./index.html', './src/**/*.{ts,tsx}'],
-  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'system-ui', 'sans-serif'],
-        mono: ['DM Mono', 'Fira Code', 'ui-monospace', 'monospace'],
+        sans: ['Inter', 'Geist', 'system-ui', 'sans-serif'],
+        mono: ['Fira Code', 'ui-monospace', 'monospace'],
+      },
+      colors: {
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
+      boxShadow: {
+        'glow-violet': '0 0 20px -5px rgba(139, 92, 246, 0.4)',
+        'glow-teal': '0 0 20px -5px rgba(20, 184, 166, 0.4)',
+        'premium': '0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 0 3px rgba(0,0,0,0.02)',
+        'premium-dark': '0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 0 3px rgba(0,0,0,0.2)',
       },
       animation: {
         blink: 'blink 0.9s step-end infinite',
         shimmer: 'shimmer 1.4s ease infinite',
         'slide-up': 'slide-up 0.25s ease-out both',
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
       },
       keyframes: {
         blink: {
@@ -26,19 +66,13 @@ export default {
           from: { opacity: '0', transform: 'translateY(8px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
-      },
-      boxShadow: {
-        'glow-violet': '0 0 20px -5px rgba(139, 92, 246, 0.4)',
-        'glow-teal': '0 0 20px -5px rgba(20, 184, 166, 0.4)',
-      },
-      colors: {
-        // Design tokens — consistent with the UI palette
-        brand: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          500: '#8b5cf6',
-          600: '#7c3aed',
-          700: '#6d28d9',
+        'accordion-down': {
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
+        },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
         },
       },
     },

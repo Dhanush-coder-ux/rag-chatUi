@@ -106,21 +106,21 @@ export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
             type="button"
             disabled={isLoading}
             onClick={() => setIsModelOpen(!isModelOpen)}
-            className="flex items-center justify-between w-40 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-xl px-2.5 py-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors"
+            className="flex items-center justify-between w-40 bg-card border border-border rounded-xl px-2.5 py-1.5 text-xs font-medium text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted hover:text-foreground transition-colors"
           >
             <div className="flex items-center overflow-hidden">
-              <Cpu className="w-3.5 h-3.5 text-zinc-400 mr-2 shrink-0" />
+              <Cpu className="w-3.5 h-3.5 mr-2 shrink-0" />
               <span className="truncate">{selectedModelLabel}</span>
             </div>
             <ChevronDown 
-              className={`w-3.5 h-3.5 text-zinc-400 shrink-0 ml-1 transition-transform duration-200 ${isModelOpen ? 'rotate-180' : ''}`} 
+              className={`w-3.5 h-3.5 shrink-0 ml-1 transition-transform duration-200 ${isModelOpen ? 'rotate-180' : ''}`} 
             />
           </button>
 
           {/* Popover Menu (Opens Upwards) */}
           {isModelOpen && (
-            <div className="absolute right-0 bottom-full mb-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-700/80 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
-              <div className="px-2 py-1.5 text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+            <div className="absolute right-0 bottom-full mb-2 w-48 bg-popover border border-border rounded-xl shadow-premium dark:shadow-premium-dark overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                 Select Model
               </div>
               <ul className="p-1 flex flex-col gap-0.5">
@@ -134,8 +134,8 @@ export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
                       }}
                       className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium text-left transition-colors
                         ${model === option.value 
-                          ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400' 
-                          : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
+                          ? 'bg-primary/10 text-primary' 
+                          : 'text-foreground hover:bg-muted'
                         }`}
                     >
                       {option.label}
@@ -150,11 +150,11 @@ export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
       </div>
 
       {/* ── Main Input Area ───────────────────────────────────────────── */}
-      <div className="relative flex flex-col bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-700/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] rounded-3xl transition-all duration-300 focus-within:border-zinc-300 dark:focus-within:border-zinc-600 focus-within:shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:focus-within:shadow-[0_8px_30px_rgb(0,0,0,0.3)] z-10">
+      <div className="relative flex flex-col bg-card/80 backdrop-blur-xl border border-border shadow-premium dark:shadow-premium-dark rounded-3xl transition-all duration-300 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 z-10">
 
         {mode === 'documents' && documents.length > 0 && (
           <div className="flex items-center gap-2 px-4 pt-3 pb-1">
-            <div className="flex items-center gap-1.5 bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 px-2.5 py-1 rounded-lg text-xs font-medium border border-violet-100 dark:border-violet-800/50">
+            <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-xs font-medium border border-primary/20">
               <FileText className="w-3.5 h-3.5" />
               Searching {documents.length} {documents.length === 1 ? 'document' : 'documents'}
             </div>
@@ -174,7 +174,7 @@ export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             rows={1}
-            className="flex-1 resize-none bg-transparent text-[15px] text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400 outline-none leading-relaxed py-1.5 max-h-48 overflow-y-auto scrollbar-thin"
+            className="flex-1 resize-none bg-transparent text-[15px] text-foreground placeholder-muted-foreground outline-none leading-relaxed py-1.5 max-h-48 overflow-y-auto scrollbar-thin"
             aria-label="Chat input"
             aria-multiline="true"
             disabled={isLoading}
@@ -196,8 +196,8 @@ export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
                 disabled={!canSubmit}
                 className={`w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-200
                   ${canSubmit
-                    ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-md hover:scale-105 active:scale-95'
-                    : 'bg-zinc-100 dark:bg-zinc-800/50 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
+                    ? 'bg-gradient-to-r from-primary to-purple-600 text-primary-foreground shadow-md hover:scale-105 active:scale-95 border border-primary/20'
+                    : 'bg-muted text-muted-foreground cursor-not-allowed'
                   }`}
                 aria-label="Send message"
               >
@@ -232,14 +232,14 @@ const ModeButton: React.FC<ModeButtonProps> = ({ active, onClick, icon, label, c
     onClick={onClick}
     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 border
       ${active
-        ? 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
-        : 'bg-transparent border-transparent text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-700 dark:hover:text-zinc-300'
+        ? 'bg-card border-border text-foreground shadow-sm'
+        : 'bg-transparent border-transparent text-muted-foreground hover:bg-muted hover:text-foreground'
       }`}
   >
     {icon}
     <span>{label}</span>
     {count !== undefined && count > 0 && (
-      <span className={`ml-1 px-1.5 rounded-md text-[10px] ${active ? 'bg-zinc-100 dark:bg-zinc-700' : 'bg-zinc-200/50 dark:bg-zinc-800/50'}`}>
+      <span className={`ml-1 px-1.5 rounded-md text-[10px] ${active ? 'bg-muted text-foreground' : 'bg-muted text-muted-foreground'}`}>
         {count}
       </span>
     )}

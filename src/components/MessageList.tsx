@@ -13,17 +13,17 @@ interface Props {
 const EmptyState: React.FC = () => (
   <div className="flex flex-col items-center justify-center h-full gap-6 px-6 text-center select-none animate-in fade-in slide-in-from-bottom-4 duration-700">
     <div className="relative w-16 h-16 group">
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/20 to-indigo-500/20 dark:from-violet-500/30 dark:to-indigo-500/30 blur-xl group-hover:blur-2xl transition-all duration-500" />
-      <div className="relative w-16 h-16 rounded-2xl bg-white dark:bg-zinc-900 flex items-center justify-center shadow-lg border border-zinc-200/50 dark:border-zinc-700/50 transform group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 to-purple-500/20 blur-xl group-hover:blur-2xl transition-all duration-500" />
+      <div className="relative w-16 h-16 rounded-2xl bg-card flex items-center justify-center shadow-premium dark:shadow-premium-dark border border-border/50 transform group-hover:scale-105 transition-transform duration-300 overflow-hidden">
         <img src="/images/vaathi.png" alt="Vaathi Logo" className="w-full h-full object-contain p-2" />
       </div>
     </div>
 
     <div className="max-w-sm">
-      <h2 className="text-xl font-semibold text-zinc-800 dark:text-zinc-100 mb-2 tracking-tight">
+      <h2 className="text-xl font-semibold text-foreground mb-2 tracking-tight">
         How can I help you today?
       </h2>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+      <p className="text-sm text-muted-foreground leading-relaxed">
         Ask questions about your documents, get insights, or explore topics with Vaathi AI.
       </p>
     </div>
@@ -37,7 +37,7 @@ const EmptyState: React.FC = () => (
       ].map((q, i) => (
         <button
           key={q}
-          className="px-4 py-3 rounded-xl text-xs font-medium text-left text-zinc-600 dark:text-zinc-300 bg-white/50 dark:bg-zinc-800/50 hover:bg-white dark:hover:bg-zinc-800 transition-all duration-200 border border-zinc-200/50 dark:border-zinc-700/50 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+          className="px-4 py-3 rounded-xl text-xs font-medium text-left text-muted-foreground bg-card/50 hover:bg-card hover:text-foreground transition-all duration-200 border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-0.5"
           style={{ animationDelay: `${i * 100}ms` }}
           onClick={() => {
             const input = document.querySelector<HTMLTextAreaElement>('textarea[data-chat-input]');
@@ -59,11 +59,11 @@ const EmptyState: React.FC = () => (
 const SessionLoadingState: React.FC = () => (
   <div className="flex flex-col items-center justify-center h-full gap-3 select-none">
     <div className="relative">
-      <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
-        <Loader2 className="w-5 h-5 text-violet-500 dark:text-violet-400 animate-spin" />
+      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+        <Loader2 className="w-5 h-5 text-primary animate-spin" />
       </div>
     </div>
-    <p className="text-sm text-zinc-400 dark:text-zinc-500 font-medium">
+    <p className="text-sm text-muted-foreground font-medium">
       Loading conversation…
     </p>
   </div>
@@ -114,7 +114,7 @@ export const MessageList: React.FC<Props> = memo(({ messages, onRegenerate }) =>
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800 relative"
+      className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth scrollbar-thin relative"
       role="log"
       aria-label="Conversation"
       aria-live="polite"

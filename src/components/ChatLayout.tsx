@@ -170,7 +170,7 @@ export const ChatLayout: React.FC = () => {
 
   return (
     <div
-      className="flex h-screen bg-zinc-50 dark:bg-zinc-950 overflow-hidden"
+      className="flex h-screen bg-background text-foreground overflow-hidden"
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}

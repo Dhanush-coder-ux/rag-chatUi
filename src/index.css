@@ -1,99 +1,119 @@
-/* ── Custom font stack ─────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
-
 @layer base {
   :root {
-    font-family: 'DM Sans', system-ui, sans-serif;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 262 83% 58%; /* Violet / Indigo */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 262 83% 58%;
+
+    --radius: 0.75rem;
+
+    font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: 'cv11', 'ss01';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 262 83% 58%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 262 83% 58%;
+  }
+
   * {
+    @apply border-border;
     box-sizing: border-box;
   }
 
-  html {
-    height: 100%;
-  }
-
-  body {
+  html, body, #root {
     height: 100%;
     margin: 0;
     padding: 0;
-  }
-
-  #root {
-    height: 100%;
+    @apply bg-background text-foreground;
   }
 
   /* Scrollbar */
   ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #d4d4d8;
-    border-radius: 10px;
-  }
-  .dark ::-webkit-scrollbar-thumb {
-    background: #3f3f46;
+    @apply bg-muted-foreground/30 rounded-full;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #a1a1aa;
-  }
-  .dark ::-webkit-scrollbar-thumb:hover {
-    background: #52525b;
+    @apply bg-muted-foreground/50;
   }
 
   /* Code font */
   code, pre, kbd {
-    font-family: 'DM Mono', 'Fira Code', ui-monospace, monospace;
+    font-family: 'Fira Code', ui-monospace, monospace;
   }
 }
 
 @layer utilities {
-  /* Blinking cursor animation */
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+  .glass {
+    @apply bg-background/80 backdrop-blur-lg border border-white/10 shadow-sm;
   }
-  .animate-blink {
-    animation: blink 0.9s step-end infinite;
+  .dark .glass {
+    @apply bg-background/60 border-white/5 shadow-none;
   }
 
-  /* Shimmer skeleton */
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-  .animate-shimmer {
-    background: linear-gradient(90deg,
-      #f4f4f5 25%, #e4e4e7 37%, #f4f4f5 63%);
-    background-size: 400% 100%;
-    animation: shimmer 1.4s ease infinite;
-  }
-  .dark .animate-shimmer {
-    background: linear-gradient(90deg,
-      #27272a 25%, #3f3f46 37%, #27272a 63%);
-    background-size: 400% 100%;
-  }
-
-  /* Subtle slide-up on message appear */
-  @keyframes slide-up {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animate-slide-up {
-    animation: slide-up 0.25s ease-out both;
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600;
   }
 
   /* Scrollbar thin utility */
