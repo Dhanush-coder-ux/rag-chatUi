@@ -109,6 +109,7 @@ interface RagContextType {
 
   askQuestion: (question: string) => Promise<RagResponse | null>;
   askQuestionStream: (question: string, cbs: StreamCallbacks) => Promise<void>;
+  processingTasks: string[];
 }
 
 // const API_BASE = 'https://rag-app-v1ew.onrender.com';
@@ -166,6 +167,8 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<number[]>([]);
 
+  const [processingTasks, setProcessingTasks] = useState<string[]>([]);
+
   const apiFetch = useCallback(async (path: string, init?: RequestInit): Promise<Response> => {
     const res = await fetch(`${API_BASE}${path}`, init);
     if (!res.ok) {
@@ -174,6 +177,38 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     }
     return res;
   }, []);
+
+  const fetchDocuments = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await apiFetch('/documents/');
+      setDocuments(await res.json());
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [apiFetch]);
+
+  const pollTask = useCallback((taskId: string) => {
+    setProcessingTasks(prev => [...prev, taskId]);
+    const checkStatus = async () => {
+      try {
+        const res = await apiFetch(`/documents/tasks/${taskId}`);
+        const data = await res.json();
+        if (data.status === 'SUCCESS' || data.status === 'FAILURE' || data.status === 'REVOKED') {
+          setProcessingTasks(prev => prev.filter(id => id !== taskId));
+          if (data.status === 'SUCCESS') await fetchDocuments();
+          return;
+        }
+        setTimeout(checkStatus, 2000);
+      } catch (err) {
+        setProcessingTasks(prev => prev.filter(id => id !== taskId));
+      }
+    };
+    checkStatus();
+  }, [apiFetch, fetchDocuments]);
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -252,19 +287,6 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     return createSession();
   }, [sessionId, createSession]);
 
-  const fetchDocuments = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await apiFetch('/documents/');
-      setDocuments(await res.json());
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [apiFetch]);
-
   const uploadDocument = useCallback(async (file: File): Promise<TaskResponse | null> => {
     setIsLoading(true);
     setError(null);
@@ -273,7 +295,12 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
       form.append('file', file);
       const res = await apiFetch('/documents/upload', { method: 'POST', body: form });
       const data: TaskResponse = await res.json();
-      await fetchDocuments();
+      
+      if (data.task_id) {
+        pollTask(data.task_id);
+      } else {
+        await fetchDocuments();
+      }
       return data;
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err));
@@ -281,7 +308,7 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [apiFetch, fetchDocuments]);
+  }, [apiFetch, fetchDocuments, pollTask]);
 
   const uploadYoutubeVideo = useCallback(async (url: string): Promise<TaskResponse | null> => {
     setIsLoading(true);
@@ -293,7 +320,11 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
         body: JSON.stringify({ url, model }),
       });
       const data: TaskResponse = await res.json();
-      await fetchDocuments();
+      if (data.task_id) {
+        pollTask(data.task_id);
+      } else {
+        await fetchDocuments();
+      }
       return data;
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err));
@@ -301,7 +332,7 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [apiFetch, fetchDocuments, model]);
+  }, [apiFetch, fetchDocuments, model, pollTask]);
 
   const deleteDocument = useCallback(async (id: number) => {
     setIsLoading(true);
@@ -461,7 +492,7 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
       selectedDocumentIds, toggleSelectedDocument, clearSelectedDocuments,
       fetchSessions, createSession, deleteSession, switchSession,
       fetchDocuments, uploadDocument, uploadYoutubeVideo, deleteDocument,
-      askQuestion, askQuestionStream,
+      askQuestion, askQuestionStream, processingTasks,
     }}>
       {children}
     </RagContext.Provider>

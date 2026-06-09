@@ -1,5 +1,9 @@
+// components/ChatInput.tsx — VAATHI OS Command Center
 import React, { useState, useCallback, useRef, useEffect, KeyboardEvent } from 'react';
-import { ArrowUp, Square, Globe, FileText, Layers, Cpu, ChevronDown, Check, X } from 'lucide-react';
+import {
+  ArrowUp, Square, Globe, FileText, Layers,
+  Cpu, ChevronDown, Check, X, Paperclip, Mic,
+} from 'lucide-react';
 import { useRagContext, RagMode, LlmModel } from '../context/RagContext';
 import { FileUploadButton } from './FileUploadButton';
 import { YoutubeUploadButton } from './YoutubeUploadButton';
@@ -11,23 +15,18 @@ interface Props {
 export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
   const { isLoading, documents, mode, setMode, model, setModel, selectedDocumentIds, clearSelectedDocuments } = useRagContext();
   const [value, setValue] = useState('');
-  
-  // Refs
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
-  // Custom Dropdown State
   const [isModelOpen, setIsModelOpen] = useState(false);
+  const [isFocused, setIsFocused]     = useState(false);
 
-  // Auto-resize textarea
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
     ta.style.height = 'auto';
-    ta.style.height = `${Math.min(ta.scrollHeight, 200)}px`;
+    ta.style.height = `${Math.min(ta.scrollHeight, 180)}px`;
   }, [value]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -57,172 +56,243 @@ export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
   );
 
   const placeholder =
-    mode === 'web'      ? 'Search the web...' :
-    mode === 'hybrid'   ? 'Ask anything (Web + Docs)...' :
-                          'Ask about your documents...';
+    mode === 'web'    ? 'Search the web with VAATHI...' :
+    mode === 'hybrid' ? 'Ask anything — Web + Docs mode active...' :
+                        'Ask VAATHI...';
 
   const canSubmit = value.trim().length > 0 && !isLoading;
 
-  // Model Options Configuration
-  const modelOptions: { value: LlmModel; label: string }[] = [
-    { value: 'auto', label: 'Auto (Fallback)' },
-    { value: 'gemini', label: 'Gemini 2.5 Flash' },
-    { value: 'llama3', label: 'Llama 3 Local' },
+  const modelOptions: { value: LlmModel; label: string; tag: string }[] = [
+    { value: 'auto',   label: 'Auto (Fallback)',  tag: 'AUTO'    },
+    { value: 'gemini', label: 'Gemini 2.5 Flash', tag: 'GEMINI'  },
+    { value: 'llama3', label: 'Llama 3 Local',    tag: 'LOCAL'   },
   ];
-  
-  const selectedModelLabel = modelOptions.find(o => o.value === model)?.label || 'Auto (Fallback)';
+  const selectedModel = modelOptions.find(o => o.value === model) || modelOptions[0];
 
   return (
-    <div className="px-4 pb-6 pt-2 w-full max-w-4xl mx-auto relative">
+    <div className="px-4 pb-5 pt-2 w-full max-w-4xl mx-auto relative">
 
-      {/* ── Mode & Model Selectors ─────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-3 px-1 relative z-20">
-        
-        {/* Left Side: Modes */}
-        <div className="flex items-center gap-1.5">
+      {/* ── Top toolbar: Modes + Model ───────────────────────────────────── */}
+      <div className="flex items-center justify-between mb-2.5 px-1 relative z-20">
+
+        {/* Mode buttons */}
+        <div className="flex items-center gap-1">
           <ModeButton
             active={mode === 'documents'}
             onClick={() => setMode('documents')}
-            icon={<FileText className="w-4 h-4" />}
-            label="Documents"
+            icon={<FileText className="w-3.5 h-3.5" />}
+            label="Docs"
             count={documents.length}
           />
           <ModeButton
             active={mode === 'web'}
             onClick={() => setMode('web')}
-            icon={<Globe className="w-4 h-4" />}
-            label="Web Search"
+            icon={<Globe className="w-3.5 h-3.5" />}
+            label="Web"
           />
           <ModeButton
             active={mode === 'hybrid'}
             onClick={() => setMode('hybrid')}
-            icon={<Layers className="w-4 h-4" />}
+            icon={<Layers className="w-3.5 h-3.5" />}
             label="Hybrid"
           />
         </div>
 
-        {/* Right Side: Custom Model Selector Dropdown */}
+        {/* Model selector */}
         <div className="relative" ref={dropdownRef}>
           <button
             type="button"
             disabled={isLoading}
             onClick={() => setIsModelOpen(!isModelOpen)}
-            className="flex items-center justify-between w-40 bg-card border border-border rounded-xl px-2.5 py-1.5 text-xs font-medium text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted hover:text-foreground transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-sys-border
+              text-[11px] font-mono font-medium text-muted-foreground
+              hover:text-sys-cyan hover:border-sys-cyan/25 hover:bg-sys-cyan/5
+              disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            <div className="flex items-center overflow-hidden">
-              <Cpu className="w-3.5 h-3.5 mr-2 shrink-0" />
-              <span className="truncate">{selectedModelLabel}</span>
-            </div>
-            <ChevronDown 
-              className={`w-3.5 h-3.5 shrink-0 ml-1 transition-transform duration-200 ${isModelOpen ? 'rotate-180' : ''}`} 
-            />
+            <Cpu className="w-3 h-3" />
+            <span>{selectedModel.tag}</span>
+            <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isModelOpen ? 'rotate-180' : ''}`} />
           </button>
 
-          {/* Popover Menu (Opens Upwards) */}
           {isModelOpen && (
-            <div className="absolute right-0 bottom-full mb-2 w-48 bg-popover border border-border rounded-xl shadow-premium dark:shadow-premium-dark overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
-              <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                Select Model
+            <div className="absolute right-0 bottom-full mb-2 w-52 py-1.5 rounded-xl z-50
+              border border-sys-border shadow-premium-dark overflow-hidden
+              animate-in fade-in zoom-in-95 duration-150"
+              style={{ background: '#0F172A', backdropFilter: 'blur(20px)' }}>
+              <div className="px-3 pb-1.5">
+                <p className="system-label" style={{ fontSize: '9px' }}>SELECT AI ENGINE</p>
               </div>
-              <ul className="p-1 flex flex-col gap-0.5">
-                {modelOptions.map((option) => (
-                  <li key={option.value}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setModel(option.value);
-                        setIsModelOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium text-left transition-colors
-                        ${model === option.value 
-                          ? 'bg-primary/10 text-primary' 
-                          : 'text-foreground hover:bg-muted'
-                        }`}
-                    >
-                      {option.label}
-                      {model === option.value && <Check className="w-3.5 h-3.5" />}
-                    </button>
-                  </li>
+              <div className="px-1.5 space-y-0.5">
+                {modelOptions.map(option => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => { setModel(option.value); setIsModelOpen(false); }}
+                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg
+                      text-xs font-medium text-left transition-colors
+                      ${model === option.value
+                        ? 'text-sys-cyan'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                      }`}
+                    style={model === option.value ? { background: 'rgba(0,229,255,0.08)' } : {}}
+                  >
+                    <div>
+                      <p className="font-semibold">{option.label}</p>
+                      <p className="system-label mt-0.5" style={{ fontSize: '8px' }}>{option.tag}</p>
+                    </div>
+                    {model === option.value && (
+                      <Check className="w-3.5 h-3.5 text-sys-cyan" />
+                    )}
+                  </button>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* ── Main Input Area ───────────────────────────────────────────── */}
-      <div className="relative flex flex-col bg-card/80 backdrop-blur-xl border border-border shadow-premium dark:shadow-premium-dark rounded-3xl transition-all duration-300 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 z-10">
+      {/* ── Selected doc filter tag ──────────────────────────────────────── */}
+      {mode === 'documents' && selectedDocumentIds.length > 0 && (
+        <div className="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-lg border border-sys-cyan/25"
+          style={{ background: 'rgba(0,229,255,0.06)' }}>
+          <FileText className="w-3.5 h-3.5 text-sys-cyan" />
+          <span className="text-[11px] text-sys-cyan font-mono font-medium">
+            TARGETING {selectedDocumentIds.length} DOCUMENT{selectedDocumentIds.length !== 1 ? 'S' : ''}
+          </span>
+          <button
+            onClick={() => clearSelectedDocuments()}
+            className="ml-auto p-0.5 rounded hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition-colors"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      )}
 
-        {mode === 'documents' && (
-          <div className="flex flex-wrap items-center gap-2 px-4 pt-3 pb-1">
-            {selectedDocumentIds.length > 0 ? (
-              <div className="flex items-center gap-1.5 bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 px-2.5 py-1 rounded-lg text-xs font-medium border border-violet-200 dark:border-violet-500/30">
-                <FileText className="w-3.5 h-3.5" />
-                <span>Searching specific {selectedDocumentIds.length} {selectedDocumentIds.length === 1 ? 'document' : 'documents'}</span>
-                <button onClick={() => clearSelectedDocuments()} className="ml-1 p-0.5 rounded-full hover:bg-violet-200 dark:hover:bg-violet-500/30 hover:text-rose-500 transition-colors">
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            ) : documents.length > 0 ? (
-              <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-xs font-medium border border-primary/20">
-                <FileText className="w-3.5 h-3.5" />
-                Searching all {documents.length} {documents.length === 1 ? 'document' : 'documents'}
-              </div>
-            ) : null}
-          </div>
+      {mode === 'documents' && documents.length > 0 && selectedDocumentIds.length === 0 && (
+        <div className="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-lg border border-sys-border"
+          style={{ background: 'rgba(0,229,255,0.03)' }}>
+          <FileText className="w-3.5 h-3.5 text-sys-cyan/60" />
+          <span className="text-[11px] text-muted-foreground font-mono">
+            SEARCHING ALL {documents.length} DOCUMENT{documents.length !== 1 ? 'S' : ''}
+          </span>
+        </div>
+      )}
+
+      {/* ── Main Command Input ──────────────────────────────────────────────── */}
+      <div
+        className="relative flex flex-col rounded-xl border transition-all duration-300 z-10"
+        style={{
+          background: 'rgba(17,24,39,0.85)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderColor: isFocused ? 'rgba(0,229,255,0.35)' : '#1E293B',
+          boxShadow: isFocused
+            ? '0 0 20px rgba(0,229,255,0.2), 0 0 0 1px rgba(0,229,255,0.1), 0 4px 24px rgba(0,0,0,0.4)'
+            : '0 4px 24px rgba(0,0,0,0.3)',
+        }}
+      >
+        {/* Top accent line when focused */}
+        {isFocused && (
+          <div className="absolute top-0 inset-x-0 h-px rounded-t-xl"
+            style={{ background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.5), transparent)' }} />
         )}
 
+        {/* Input row */}
         <div className="flex items-end gap-2 px-3 py-3">
-          <div className="shrink-0 mb-1 ml-1 flex items-center gap-1">
+          {/* Left: Upload buttons */}
+          <div className="shrink-0 flex items-center gap-1 mb-0.5">
             <FileUploadButton />
             <YoutubeUploadButton />
           </div>
 
+          {/* Textarea */}
           <textarea
             ref={textareaRef}
             data-chat-input
             value={value}
             onChange={e => setValue(e.target.value)}
             onKeyDown={handleKeyDown}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
             rows={1}
-            className="flex-1 resize-none bg-transparent text-[15px] text-foreground placeholder-muted-foreground outline-none leading-relaxed py-1.5 max-h-48 overflow-y-auto scrollbar-thin"
+            className="flex-1 resize-none bg-transparent text-[14px] text-foreground
+              placeholder-muted-foreground outline-none leading-relaxed py-1
+              max-h-[180px] overflow-y-auto scrollbar-thin font-sans"
             aria-label="Chat input"
             aria-multiline="true"
             disabled={isLoading}
             style={{ minHeight: '36px' }}
           />
 
-          <div className="shrink-0 mb-1 mr-1">
+          {/* Right: Voice + Send */}
+          <div className="shrink-0 flex items-center gap-1.5 mb-0.5">
+            <button
+              type="button"
+              className="w-8 h-8 flex items-center justify-center rounded-lg
+                text-muted-foreground hover:text-sys-cyan border border-sys-border
+                hover:border-sys-cyan/25 hover:bg-sys-cyan/6 transition-all"
+              title="Voice input (coming soon)"
+            >
+              <Mic className="w-4 h-4" />
+            </button>
+
             {isLoading ? (
               <button
-                onClick={() => {/* TODO: abort controller */}}
-                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                onClick={() => {/* TODO: abort */}}
+                className="w-9 h-9 flex items-center justify-center rounded-lg border transition-colors"
+                style={{
+                  background: 'rgba(255,255,255,0.08)',
+                  borderColor: '#1E293B',
+                }}
                 aria-label="Stop generating"
               >
-                <Square className="w-4 h-4 fill-current animate-pulse" />
+                <Square className="w-4 h-4 text-foreground fill-current animate-pulse" />
               </button>
             ) : (
               <button
                 onClick={handleSubmit}
                 disabled={!canSubmit}
-                className={`w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-200
+                className={`w-9 h-9 flex items-center justify-center rounded-lg border transition-all duration-200
                   ${canSubmit
-                    ? 'bg-gradient-to-r from-primary to-purple-600 text-primary-foreground shadow-md hover:scale-105 active:scale-95 border border-primary/20'
-                    : 'bg-muted text-muted-foreground cursor-not-allowed'
+                    ? 'hover:scale-105 active:scale-95'
+                    : 'cursor-not-allowed opacity-40'
                   }`}
+                style={canSubmit ? {
+                  background: 'linear-gradient(135deg, #00E5FF, #0891B2)',
+                  borderColor: 'rgba(0,229,255,0.3)',
+                  boxShadow: '0 0 12px rgba(0,229,255,0.3)',
+                  color: '#020617',
+                } : {
+                  background: 'rgba(255,255,255,0.06)',
+                  borderColor: '#1E293B',
+                  color: '#94A3B8',
+                }}
                 aria-label="Send message"
               >
-                <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
+                <ArrowUp className="w-4 h-4" strokeWidth={2.5} />
               </button>
             )}
           </div>
         </div>
+
+        {/* Bottom bar */}
+        <div className="flex items-center justify-between px-4 pb-2.5 pt-0">
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-sys-success" />
+            <span className="system-label" style={{ fontSize: '9px' }}>
+              VAATHI · {mode.toUpperCase()} MODE
+            </span>
+          </div>
+          <span className="system-label" style={{ fontSize: '9px' }}>
+            ↵ SEND · ⇧+↵ NEWLINE
+          </span>
+        </div>
       </div>
 
-      <div className="text-center mt-3 opacity-60 hover:opacity-100 transition-opacity">
-        <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
-          Vaathi may produce inaccurate information about people, places, or facts.
+      <div className="text-center mt-2.5 opacity-50">
+        <p className="text-[10px] text-muted-foreground font-mono">
+          // VAATHI may produce inaccurate results — verify critical information
         </p>
       </div>
     </div>
@@ -230,7 +300,6 @@ export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
 };
 
 // ── Mode Button ───────────────────────────────────────────────────────────────
-
 interface ModeButtonProps {
   active:  boolean;
   onClick: () => void;
@@ -242,16 +311,23 @@ interface ModeButtonProps {
 const ModeButton: React.FC<ModeButtonProps> = ({ active, onClick, icon, label, count }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 border
+    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-medium
+      transition-all duration-200 border
       ${active
-        ? 'bg-card border-border text-foreground shadow-sm'
-        : 'bg-transparent border-transparent text-muted-foreground hover:bg-muted hover:text-foreground'
+        ? 'text-sys-cyan border-sys-cyan/30'
+        : 'border-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground hover:border-sys-border'
       }`}
+    style={active ? { background: 'rgba(0,229,255,0.08)' } : {}}
   >
     {icon}
     <span>{label}</span>
     {count !== undefined && count > 0 && (
-      <span className={`ml-1 px-1.5 rounded-md text-[10px] ${active ? 'bg-muted text-foreground' : 'bg-muted text-muted-foreground'}`}>
+      <span className={`ml-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold font-mono
+        ${active ? 'text-sys-cyan' : 'text-muted-foreground'}`}
+        style={active
+          ? { background: 'rgba(0,229,255,0.15)' }
+          : { background: 'rgba(255,255,255,0.06)' }
+        }>
         {count}
       </span>
     )}

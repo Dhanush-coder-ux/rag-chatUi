@@ -1,3 +1,4 @@
+// components/MessageList.tsx — VAATHI OS
 import React, { useEffect, useRef, memo, useCallback } from 'react';
 import { Message } from '../types';
 import { MessageBubble } from './MessageBubble';
@@ -9,63 +10,20 @@ interface Props {
   onRegenerate?: () => void;
 }
 
-// ── Empty State ───────────────────────────────────────────────────────────────
-const EmptyState: React.FC = () => (
-  <div className="flex flex-col items-center justify-center h-full gap-6 px-6 text-center select-none animate-in fade-in slide-in-from-bottom-4 duration-700">
-    <div className="relative w-16 h-16 group">
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 to-purple-500/20 blur-xl group-hover:blur-2xl transition-all duration-500" />
-      <div className="relative w-16 h-16 rounded-2xl bg-card flex items-center justify-center shadow-premium dark:shadow-premium-dark border border-border/50 transform group-hover:scale-105 transition-transform duration-300 overflow-hidden">
-        <img src="/images/vaathi.png" alt="Vaathi Logo" className="w-full h-full object-contain p-2" />
-      </div>
-    </div>
-
-    <div className="max-w-sm">
-      <h2 className="text-xl font-semibold text-foreground mb-2 tracking-tight">
-        How can I help you today?
-      </h2>
-      <p className="text-sm text-muted-foreground leading-relaxed">
-        Ask questions about your documents, get insights, or explore topics with Vaathi AI.
-      </p>
-    </div>
-
-    <div className="grid grid-cols-2 gap-3 w-full max-w-md mt-4">
-      {[
-        'Summarize the main document',
-        'What are the key findings?',
-        'List all action items',
-        'Explain this in simple terms',
-      ].map((q, i) => (
-        <button
-          key={q}
-          className="px-4 py-3 rounded-xl text-xs font-medium text-left text-muted-foreground bg-card/50 hover:bg-card hover:text-foreground transition-all duration-200 border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-0.5"
-          style={{ animationDelay: `${i * 100}ms` }}
-          onClick={() => {
-            const input = document.querySelector<HTMLTextAreaElement>('textarea[data-chat-input]');
-            if (!input) return;
-            const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
-            setter?.call(input, q);
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.focus();
-          }}
-        >
-          {q}
-        </button>
-      ))}
-    </div>
-  </div>
-);
-
 // ── Session Loading State ─────────────────────────────────────────────────────
 const SessionLoadingState: React.FC = () => (
-  <div className="flex flex-col items-center justify-center h-full gap-3 select-none">
+  <div className="flex flex-col items-center justify-center h-full gap-4 select-none">
     <div className="relative">
-      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-        <Loader2 className="w-5 h-5 text-primary animate-spin" />
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+        style={{ background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.2)' }}>
+        <Loader2 className="w-6 h-6 text-sys-cyan animate-spin" />
       </div>
+      <div className="absolute -inset-2 rounded-2xl border border-sys-cyan/20 animate-ping" />
     </div>
-    <p className="text-sm text-muted-foreground font-medium">
-      Loading conversation…
-    </p>
+    <div className="text-center">
+      <p className="text-sm font-semibold text-foreground font-mono">Loading Conversation</p>
+      <p className="text-[11px] text-muted-foreground mt-1 font-mono">// Fetching message history…</p>
+    </div>
   </div>
 );
 
@@ -90,25 +48,23 @@ export const MessageList: React.FC<Props> = memo(({ messages, onRegenerate }) =>
     }
   }, [messages, isLoading]);
 
-  // When session switches, scroll to bottom to show latest messages
   useEffect(() => {
     scrolledUpRef.current = false;
     requestAnimationFrame(() => {
       bottomRef.current?.scrollIntoView({ behavior: 'instant' });
     });
-  }, [messages.length === 0]);  // fires when messages reset on session switch
+  }, [messages.length === 0]);
 
-  // When conversation clears, reset scroll position
   useEffect(() => {
     if (messages.length === 0) {
       scrolledUpRef.current = false;
     }
   }, [messages.length]);
 
-  // Show spinner while fetching a session's history — not the empty state
   if (sessionLoading) return <SessionLoadingState />;
 
-  if (messages.length === 0 && !isLoading) return <EmptyState />;
+  // Empty state is handled by ChatLayout (shows Dashboard)
+  if (messages.length === 0 && !isLoading) return null;
 
   return (
     <div
@@ -119,21 +75,15 @@ export const MessageList: React.FC<Props> = memo(({ messages, onRegenerate }) =>
       aria-label="Conversation"
       aria-live="polite"
     >
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+      <div className="max-w-4xl mx-auto py-6 space-y-2">
         {messages.map((msg, idx) => (
-          <div
+          <MessageBubble
             key={msg.id}
-            className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
-            style={{ animationDelay: `${Math.min(idx * 50, 300)}ms` }}
-          >
-            <MessageBubble
-              message={msg}
-              isLast={idx === messages.length - 1}
-              onRegenerate={idx === messages.length - 1 ? onRegenerate : undefined}
-            />
-          </div>
+            message={msg}
+            isLast={idx === messages.length - 1}
+            onRegenerate={idx === messages.length - 1 ? onRegenerate : undefined}
+          />
         ))}
-
         <div ref={bottomRef} className="h-6" aria-hidden="true" />
       </div>
     </div>

@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 
-type Theme = 'light' | 'dark';
+type Theme = 'dark';
 
 interface ThemeContextValue {
   theme: Theme;
-  toggleTheme: () => void;
+  toggleTheme: () => void; // kept for interface compatibility — no-op
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
@@ -13,26 +13,14 @@ const ThemeContext = createContext<ThemeContextValue>({
 });
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem('theme') as Theme | null;
-    if (stored) return stored;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
+  // VAATHI OS is dark-only. Always enforce the dark class.
+  if (typeof document !== 'undefined') {
+    document.documentElement.classList.add('dark');
+    document.documentElement.style.colorScheme = 'dark';
+  }
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme: 'dark', toggleTheme: () => {} }}>
       {children}
     </ThemeContext.Provider>
   );

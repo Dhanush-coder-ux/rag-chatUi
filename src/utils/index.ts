@@ -82,17 +82,32 @@ export const getYoutubeThumbnailUrl = (videoId: string, quality: 'maxres' | 'hq'
  * Returns the video ID if it's a YouTube video, null otherwise
  */
 export const getYoutubeVideoIdFromFilename = (filename: string): string | null => {
-  // Check if filename contains 'youtube' or looks like a video ID
-  if (filename.toLowerCase().includes('youtube')) {
-    const videoId = extractYoutubeVideoId(filename);
-    if (videoId) return videoId;
+  if (!filename) return null;
+
+  // 1. Try to extract a full YouTube URL embedded in the filename
+  const urlPatterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const pattern of urlPatterns) {
+    const match = filename.match(pattern);
+    if (match) return match[1];
   }
 
-  // Check if it's just a video ID pattern
-  const videoId = extractYoutubeVideoId(filename);
-  if (videoId && filename.length === 11) {
-    return videoId;
+  // 2. Look for [videoId] or (videoId) bracket notation — common in yt-dlp filenames
+  const bracketMatch = filename.match(/[\[\(]([a-zA-Z0-9_-]{11})[\]\)]/);
+  if (bracketMatch) return bracketMatch[1];
+
+  // 3. If filename contains 'youtube' keyword, try to find an 11-char ID anywhere
+  if (filename.toLowerCase().includes('youtube')) {
+    const idMatch = filename.match(/[a-zA-Z0-9_-]{11}/);
+    if (idMatch) return idMatch[0];
   }
+
+  // 4. If the entire filename (without extension) is exactly 11 chars
+  const nameWithoutExt = filename.replace(/\.[^.]+$/, '').trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(nameWithoutExt)) return nameWithoutExt;
 
   return null;
 };

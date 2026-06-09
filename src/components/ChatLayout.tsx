@@ -1,55 +1,47 @@
+// components/ChatLayout.tsx — VAATHI OS Shell
 import React, { useState, useCallback, useRef } from 'react';
-import { Sidebar }        from './Sidebar';
-import { ChatHeader }     from './ChatHeader';
-import { MessageList }    from './MessageList';
-import { ChatInput }      from './ChatInput';
+import { Sidebar }         from './Sidebar';
+import { ChatHeader }      from './ChatHeader';
+import { MessageList }     from './MessageList';
+import { ChatInput }       from './ChatInput';
+import { Dashboard }       from './Dashboard';
 import { DropZoneOverlay } from './FileUploadButton';
-import { useFileUpload }  from '../hooks/useFileUpload';
+import { useFileUpload }   from '../hooks/useFileUpload';
 import { Message, SourceItem } from '../types';
-import { useRagContext }  from '../context/RagContext';
+import { useRagContext }   from '../context/RagContext';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
 const makeId  = () => `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const nowDate = () => new Date();
 
-// Map pipeline step label → ToolUse icon
 function stepToIcon(step: string): 'search' | 'web' | 'brain' {
-  if (step.includes('🌐') || step.toLowerCase().includes('web'))      return 'web';
-  if (step.includes('📄') || step.toLowerCase().includes('doc'))      return 'search';
+  if (step.includes('🌐') || step.toLowerCase().includes('web'))  return 'web';
+  if (step.includes('📄') || step.toLowerCase().includes('doc'))  return 'search';
   return 'brain';
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-
 export const ChatLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  // ✅ UPDATE THIS LINE
-  const { messages, setMessages, askQuestionStream } = useRagContext();
+  const { messages, setMessages, askQuestionStream, sessionLoading } = useRagContext();
   const streamingIdRef = useRef<string | null>(null);
   const { isDragging, handleDragEnter, handleDragLeave, handleDragOver, handleDrop } = useFileUpload();
 
   const toggleSidebar = useCallback(() => setSidebarOpen(v => !v), []);
 
-  // ── Patch a streaming message in place ──────────────────────────────────
   const patchMessage = useCallback((id: string, patch: Partial<Message>) => {
-    // Added Message[] type to prev
     setMessages((prev: Message[]) =>
       prev.map(m => m.id === id ? { ...m, ...patch } : m),
     );
   }, []);
 
-  // ── Submit handler (lifted from ChatInput) ───────────────────────────────
   const handleSubmit = useCallback(async (question: string) => {
-    // 1. Append user message
     const userMsg: Message = {
       id:        makeId(),
       role:      'user',
       content:   question,
       timestamp: nowDate(),
     };
-
-    // 2. Create empty assistant placeholder
     const assistantId = makeId();
     const assistantMsg: Message = {
       id:           assistantId,
@@ -59,57 +51,33 @@ export const ChatLayout: React.FC = () => {
       streamStatus: 'streaming',
       tools:        [],
     };
-
     streamingIdRef.current = assistantId;
-    // Added Message[] type to prev
     setMessages((prev: Message[]) => [...prev, userMsg, assistantMsg]);
 
-    // 3. Stream
     await askQuestionStream(question, {
       onStep: (step) => {
-        patchMessage(assistantId, {
-          tools: [
-            // Mark previous tools done, add new running one
-            // We accumulate by label so duplicates don't pile up
-          ],
-        });
-        // Simpler: append as a ToolUse entry
-        // Added Message[] type to prev
         setMessages((prev: Message[]) => prev.map(m => {
           if (m.id !== assistantId) return m;
           const existing = m.tools ?? [];
-          // Mark all previous as done
           const finished = existing.map(t => ({ ...t, status: 'done' as const }));
           return {
             ...m,
             tools: [
               ...finished,
-              {
-                id:     makeId(),
-                label:  step,
-                icon:   stepToIcon(step),
-                status: 'running' as const,
-              },
+              { id: makeId(), label: step, icon: stepToIcon(step), status: 'running' as const },
             ],
           };
         }));
       },
-
       onChunk: (token) => {
-        // Added Message[] type to prev
         setMessages((prev: Message[]) => prev.map(m =>
-          m.id === assistantId
-            ? { ...m, content: m.content + token }
-            : m,
+          m.id === assistantId ? { ...m, content: m.content + token } : m,
         ));
       },
-
       onSources: (sources: SourceItem[]) => {
         patchMessage(assistantId, { sources });
       },
-
       onToolUsed: (toolUsed) => {
-        // Added Message[] type to prev
         setMessages((prev: Message[]) => prev.map(m => {
           if (m.id !== assistantId) return m;
           const existing = m.tools ?? [];
@@ -127,14 +95,10 @@ export const ChatLayout: React.FC = () => {
           };
         }));
       },
-
       onTraceId: (traceId) => {
         patchMessage(assistantId, { traceId });
       },
-
       onDone: () => {
-        // Mark all tools done, close stream
-        // Added Message[] type to prev
         setMessages((prev: Message[]) => prev.map(m => {
           if (m.id !== assistantId) return m;
           return {
@@ -145,54 +109,67 @@ export const ChatLayout: React.FC = () => {
         }));
         streamingIdRef.current = null;
       },
-
-      onError: (err) => {
-        patchMessage(assistantId, {
-          isError:      true,
-          streamStatus: 'done',
-          content:      '',
-        });
+      onError: () => {
+        patchMessage(assistantId, { isError: true, streamStatus: 'done', content: '' });
         streamingIdRef.current = null;
       },
     });
   }, [askQuestionStream, patchMessage]);
 
-  // ── Regenerate last assistant message ────────────────────────────────────
   const handleRegenerate = useCallback(() => {
-    // Find last user message
     const lastUser = [...messages].reverse().find(m => m.role === 'user');
     if (!lastUser) return;
-    // Remove last assistant message and re-ask
-    // Added Message[] type to prev
     setMessages((prev: Message[]) => prev.filter((_, i) => i < prev.length - 1));
     handleSubmit(lastUser.content);
   }, [messages, handleSubmit]);
 
+  const showDashboard = messages.length === 0 && !sessionLoading;
+
   return (
     <div
-      className="flex h-screen bg-background text-foreground overflow-hidden"
+      className="flex h-screen overflow-hidden relative"
+      style={{ background: '#020617' }}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
+      {/* ── Ambient Background Effects ─────────────────────────────────────── */}
+      {/* Subtle grid */}
+      <div className="grid-bg fixed inset-0 pointer-events-none z-0" />
+
+      {/* Floating glow orbs */}
+      <div className="glow-orb-1" />
+      <div className="glow-orb-2" />
+
+      {/* Scan-line overlay */}
+      <div className="scan-line-overlay fixed inset-0 pointer-events-none z-0" />
+
+      {/* ── Drop Zone Overlay ──────────────────────────────────────────────── */}
       <DropZoneOverlay visible={isDragging} onDrop={() => {}} />
 
+      {/* ── Sidebar ───────────────────────────────────────────────────────── */}
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         onOpen={() => setSidebarOpen(true)}
       />
 
-      <main className="flex flex-col flex-1 min-w-0 h-full overflow-hidden relative">
+      {/* ── Main Workspace ─────────────────────────────────────────────────── */}
+      <main className="flex flex-col flex-1 min-w-0 h-full overflow-hidden relative z-10">
         <ChatHeader sidebarOpen={sidebarOpen} onToggleSidebar={toggleSidebar} />
 
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <MessageList
-            messages={messages}
-            onRegenerate={handleRegenerate}
-          />
-          {/* onSubmit is now owned here, not inside ChatInput */}
+        {/* Content area */}
+        <div className="flex flex-col flex-1 overflow-hidden min-h-0">
+          {showDashboard ? (
+            <Dashboard />
+          ) : (
+            <MessageList
+              messages={messages}
+              onRegenerate={handleRegenerate}
+            />
+          )}
+
           <ChatInput onSubmit={handleSubmit} />
         </div>
       </main>
