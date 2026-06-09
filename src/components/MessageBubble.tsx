@@ -1,11 +1,11 @@
 import React, { memo, useState, useCallback } from 'react';
 import {
   Copy, Check, RefreshCw, Search, Globe, BrainCircuit,
-  FileText, User, ChevronDown, ChevronUp, AlertCircle, ExternalLink,
+  FileText, User, ChevronDown, ChevronUp, AlertCircle, ExternalLink, Youtube,
 } from 'lucide-react';
 import { Message, ToolUse, SourceItem } from '../types';
 import { MarkdownRenderer } from './MarkdownRenderer';
-import { copyToClipboard, formatTimestamp } from '../utils';
+import { copyToClipboard, formatTimestamp, extractYoutubeVideoId, getYoutubeThumbnailUrl } from '../utils';
 
 // ── Streaming Cursor ──────────────────────────────────────────────────────────
 const StreamingCursor = () => (
@@ -81,14 +81,27 @@ const SourcesPanel: React.FC<{ sources?: SourceItem[] }> = ({ sources }) => {
 // ── Source Card — handles both 'document' and 'web' source types ──────────────
 const SourceCard: React.FC<{ source: SourceItem }> = ({ source }) => {
   const isWeb = source.source_type === 'web';
+  
+  // Check if this is a YouTube source
+  const youtubeVideoId = source.url 
+    ? extractYoutubeVideoId(source.url)
+    : source.title
+    ? extractYoutubeVideoId(source.title)
+    : null;
+  
+  const thumbnailUrl = youtubeVideoId ? getYoutubeThumbnailUrl(youtubeVideoId, 'hq') : null;
 
   const inner = (
     <div className="group flex flex-col gap-1 p-3 rounded-xl bg-card hover:bg-muted transition-all border border-border shadow-sm hover:shadow-md">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          {isWeb
-            ? <Globe    className="w-4 h-4 text-sky-500 shrink-0" />
-            : <FileText className="w-4 h-4 text-primary shrink-0" />}
+          {youtubeVideoId ? (
+            <Youtube className="w-4 h-4 text-red-500 shrink-0" />
+          ) : isWeb ? (
+            <Globe    className="w-4 h-4 text-sky-500 shrink-0" />
+          ) : (
+            <FileText className="w-4 h-4 text-primary shrink-0" />
+          )}
           <span className="font-medium text-xs text-foreground truncate">
             {source.title ?? (isWeb ? source.url : 'Your Document')}
           </span>
@@ -102,28 +115,43 @@ const SourceCard: React.FC<{ source: SourceItem }> = ({ source }) => {
           )}
           {/* Badge for source type */}
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-            isWeb
+            youtubeVideoId
+              ? 'bg-red-500/10 text-red-500'
+              : isWeb
               ? 'bg-sky-500/10 text-sky-500'
               : 'bg-primary/10 text-primary'
           }`}>
-            {isWeb ? 'Web' : 'Doc'}
+            {youtubeVideoId ? 'YouTube' : isWeb ? 'Web' : 'Doc'}
           </span>
           {isWeb && <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-sky-500 transition-colors" />}
         </div>
       </div>
+
+      {/* YouTube thumbnail preview */}
+      {youtubeVideoId && thumbnailUrl && (
+        <img
+          src={thumbnailUrl}
+          alt={source.title || 'YouTube video'}
+          className="w-full h-28 object-cover rounded-lg mt-2 mb-1"
+          onError={(e) => {
+            // Fallback if image fails to load
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+      )}
 
       {source.snippet && (
         <p className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">
           "{source.snippet}"
         </p>
       )}
-      {source.image && (
-  <img
-    src={source.image}
-    alt={source.title || "preview"}
-    className="w-full h-28 object-cover rounded-lg mb-2"
-  />
-)}
+      {source.image && !youtubeVideoId && (
+        <img
+          src={source.image}
+          alt={source.title || "preview"}
+          className="w-full h-28 object-cover rounded-lg mb-2"
+        />
+      )}
     </div>
   );
 

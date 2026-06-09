@@ -1,14 +1,15 @@
 import React, { useState, useCallback, useRef, useEffect, KeyboardEvent } from 'react';
-import { ArrowUp, Square, Globe, FileText, Layers, Cpu, ChevronDown, Check } from 'lucide-react';
+import { ArrowUp, Square, Globe, FileText, Layers, Cpu, ChevronDown, Check, X } from 'lucide-react';
 import { useRagContext, RagMode, LlmModel } from '../context/RagContext';
 import { FileUploadButton } from './FileUploadButton';
+import { YoutubeUploadButton } from './YoutubeUploadButton';
 
 interface Props {
   onSubmit: (question: string) => void;
 }
 
 export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
-  const { isLoading, documents, mode, setMode, model, setModel } = useRagContext();
+  const { isLoading, documents, mode, setMode, model, setModel, selectedDocumentIds, clearSelectedDocuments } = useRagContext();
   const [value, setValue] = useState('');
   
   // Refs
@@ -152,18 +153,29 @@ export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
       {/* ── Main Input Area ───────────────────────────────────────────── */}
       <div className="relative flex flex-col bg-card/80 backdrop-blur-xl border border-border shadow-premium dark:shadow-premium-dark rounded-3xl transition-all duration-300 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 z-10">
 
-        {mode === 'documents' && documents.length > 0 && (
-          <div className="flex items-center gap-2 px-4 pt-3 pb-1">
-            <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-xs font-medium border border-primary/20">
-              <FileText className="w-3.5 h-3.5" />
-              Searching {documents.length} {documents.length === 1 ? 'document' : 'documents'}
-            </div>
+        {mode === 'documents' && (
+          <div className="flex flex-wrap items-center gap-2 px-4 pt-3 pb-1">
+            {selectedDocumentIds.length > 0 ? (
+              <div className="flex items-center gap-1.5 bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 px-2.5 py-1 rounded-lg text-xs font-medium border border-violet-200 dark:border-violet-500/30">
+                <FileText className="w-3.5 h-3.5" />
+                <span>Searching specific {selectedDocumentIds.length} {selectedDocumentIds.length === 1 ? 'document' : 'documents'}</span>
+                <button onClick={() => clearSelectedDocuments()} className="ml-1 p-0.5 rounded-full hover:bg-violet-200 dark:hover:bg-violet-500/30 hover:text-rose-500 transition-colors">
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ) : documents.length > 0 ? (
+              <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-xs font-medium border border-primary/20">
+                <FileText className="w-3.5 h-3.5" />
+                Searching all {documents.length} {documents.length === 1 ? 'document' : 'documents'}
+              </div>
+            ) : null}
           </div>
         )}
 
         <div className="flex items-end gap-2 px-3 py-3">
-          <div className="shrink-0 mb-1 ml-1">
+          <div className="shrink-0 mb-1 ml-1 flex items-center gap-1">
             <FileUploadButton />
+            <YoutubeUploadButton />
           </div>
 
           <textarea

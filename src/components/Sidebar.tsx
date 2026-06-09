@@ -5,10 +5,10 @@ import {
   Loader2, MoreHorizontal, Pin, Share,
   PanelLeftClose, ChevronDown,
   FileSpreadsheet, Image as ImageIcon, File, Sparkles, Database,
-  BookOpen,
+  BookOpen, Youtube,
 } from 'lucide-react';
 import { useRagContext, ChatSession } from '../context/RagContext';
-import { formatFileSize } from '../utils';
+import { formatFileSize, getYoutubeVideoIdFromFilename, getYoutubeThumbnailUrl } from '../utils';
 
 function useOutsideClick(ref: React.RefObject<HTMLElement>, callback: () => void) {
   useEffect(() => {
@@ -33,12 +33,61 @@ const getFileIcon = (filename: string) => {
   return <File className="w-3.5 h-3.5 text-zinc-400" />;
 };
 
-const FileEntry: React.FC<{ file: any; onRemove: () => void }> = ({ file, onRemove }) => {
+const FileEntry: React.FC<{ file: any; onRemove: () => void; isSelected: boolean; onToggle: () => void }> = ({ file, onRemove, isSelected, onToggle }) => {
   const filename = file.name || file.filename || `Document #${file.id}`;
+  const youtubeVideoId = getYoutubeVideoIdFromFilename(filename);
+  const thumbnailUrl = youtubeVideoId ? getYoutubeThumbnailUrl(youtubeVideoId, 'hq') : null;
+
+  if (youtubeVideoId && thumbnailUrl) {
+    return (
+      <div 
+        onClick={onToggle}
+        className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl
+        transition-all cursor-pointer border
+        ${isSelected 
+          ? 'bg-primary/10 border-primary/30 shadow-sm' 
+          : 'border-transparent hover:bg-zinc-100 dark:hover:bg-white/5 hover:border-zinc-200 dark:hover:border-white/10'}`}>
+        <div className="shrink-0 w-16 h-9 rounded-lg bg-zinc-200 dark:bg-zinc-800 overflow-hidden relative">
+          <img
+            src={thumbnailUrl}
+            alt={filename}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback if image fails to load
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/50 transition-colors">
+            <Youtube className="w-4 h-4 text-red-500" />
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium text-zinc-700 dark:text-zinc-200 truncate leading-tight">{filename}</p>
+          <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5">YouTube Video</p>
+        </div>
+        <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={e => { e.stopPropagation(); onRemove(); }}
+            className="p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500
+              hover:text-rose-500 dark:hover:text-rose-400
+              hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+            title="Delete"
+          >
+            <Trash className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="group relative flex items-center gap-3 px-3 py-2.5 rounded-xl
-      hover:bg-zinc-100 dark:hover:bg-white/5 transition-all cursor-pointer
-      border border-transparent hover:border-zinc-200 dark:hover:border-white/10">
+    <div 
+      onClick={onToggle}
+      className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl
+      transition-all cursor-pointer border
+      ${isSelected 
+        ? 'bg-primary/10 border-primary/30 shadow-sm' 
+        : 'border-transparent hover:bg-zinc-100 dark:hover:bg-white/5 hover:border-zinc-200 dark:hover:border-white/10'}`}>
       <div className="shrink-0 w-8 h-8 rounded-lg bg-zinc-100 dark:bg-white/5
         border border-zinc-200 dark:border-white/10 flex items-center justify-center">
         {getFileIcon(filename)}
@@ -208,6 +257,7 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen }) => {
     sessions, fetchSessions, createSession, deleteSession, switchSession,
     sessionId, sessionLoading, clearHistory,
     isLoading,
+    selectedDocumentIds, toggleSelectedDocument,
   } = useRagContext();
 
   const [sourcesOpen, setSourcesOpen] = useState(false);
@@ -373,6 +423,8 @@ const handleNewChat = useCallback(async () => {
                   <FileEntry
                     key={doc.id}
                     file={doc}
+                    isSelected={selectedDocumentIds.includes(doc.id)}
+                    onToggle={() => toggleSelectedDocument(doc.id)}
                     onRemove={() => deleteDocument(doc.id)}
                   />
                 ))

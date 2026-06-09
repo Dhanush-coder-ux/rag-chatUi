@@ -7,6 +7,9 @@ const ALLOWED_TYPES = [
   'text/plain',
   'text/markdown',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel',
+  'text/csv',
 ];
 
 export const FileUploadButton: React.FC = () => {
@@ -18,7 +21,12 @@ export const FileUploadButton: React.FC = () => {
 
     // Filter to only allow specified types or specific extensions
     const validFiles = Array.from(files).filter(f => 
-      ALLOWED_TYPES.includes(f.type) || f.name.endsWith('.md') || f.name.endsWith('.txt')
+      ALLOWED_TYPES.includes(f.type) || 
+      f.name.endsWith('.md') || 
+      f.name.endsWith('.txt') ||
+      f.name.endsWith('.csv') ||
+      f.name.endsWith('.xlsx') ||
+      f.name.endsWith('.xls')
     );
 
     // Process uploads sequentially through the context
@@ -38,7 +46,7 @@ export const FileUploadButton: React.FC = () => {
         ref={inputRef}
         type="file"
         multiple
-        accept=".pdf,.txt,.md,.docx"
+        accept=".pdf,.txt,.md,.docx,.xlsx,.xls,.csv"
         className="hidden"
         onChange={e => handleFiles(e.target.files)}
         aria-label="Upload files"

@@ -49,6 +49,54 @@ export const createAssistantMessage = (): Message => ({
   ],
 });
 
+/**
+ * Extract YouTube video ID from various YouTube URL formats
+ * Supports: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID, or just the ID
+ */
+export const extractYoutubeVideoId = (url: string): string | null => {
+  const patterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    /^([a-zA-Z0-9_-]{11})$/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.trim().match(pattern);
+    if (match) return match[1];
+  }
+
+  return null;
+};
+
+/**
+ * Generate YouTube thumbnail URL from video ID
+ * Quality: 'max' (1280x720), 'hq' (480x360), 'mq' (320x180), 'default' (120x90)
+ */
+export const getYoutubeThumbnailUrl = (videoId: string, quality: 'maxres' | 'hq' | 'sd' | 'mq' | 'default' = 'hq'): string => {
+  return `https://img.youtube.com/vi/${videoId}/${quality}default.jpg`;
+};
+
+/**
+ * Check if filename is a YouTube video (heuristic)
+ * Returns the video ID if it's a YouTube video, null otherwise
+ */
+export const getYoutubeVideoIdFromFilename = (filename: string): string | null => {
+  // Check if filename contains 'youtube' or looks like a video ID
+  if (filename.toLowerCase().includes('youtube')) {
+    const videoId = extractYoutubeVideoId(filename);
+    if (videoId) return videoId;
+  }
+
+  // Check if it's just a video ID pattern
+  const videoId = extractYoutubeVideoId(filename);
+  if (videoId && filename.length === 11) {
+    return videoId;
+  }
+
+  return null;
+};
+
 export const copyToClipboard = async (text: string): Promise<boolean> => {
   try {
     await navigator.clipboard.writeText(text);

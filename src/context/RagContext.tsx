@@ -7,10 +7,9 @@ import React, {
 } from 'react';
 import { Message } from '../types';
 
-// ── Enums / literals ──────────────────────────────────────────────────────────
 export type RagMode = 'documents' | 'web' | 'hybrid';
 export type ToolUsed = 'document' | 'web' | 'hybrid' | 'none';
-export type LlmModel = 'auto' | 'gemini' | 'llama3'; // ✨ Added model type
+export type LlmModel = 'auto' | 'gemini' | 'llama3';
 
 export interface HistoryMessage {
   role: 'user' | 'assistant';
@@ -93,6 +92,10 @@ interface RagContextType {
   setModel: (model: LlmModel) => void; // ✨ Exposed setModel
   clearHistory: () => void;
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+  
+  selectedDocumentIds: number[];
+  toggleSelectedDocument: (id: number) => void;
+  clearSelectedDocuments: () => void;
 
   fetchSessions: () => Promise<void>;
   createSession: () => Promise<number | null>;
@@ -101,14 +104,15 @@ interface RagContextType {
 
   fetchDocuments: () => Promise<void>;
   uploadDocument: (file: File) => Promise<TaskResponse | null>;
+  uploadYoutubeVideo: (url: string) => Promise<TaskResponse | null>;
   deleteDocument: (id: number) => Promise<void>;
 
   askQuestion: (question: string) => Promise<RagResponse | null>;
   askQuestionStream: (question: string, cbs: StreamCallbacks) => Promise<void>;
 }
 
-const API_BASE = 'https://rag-app-v1ew.onrender.com';
-// const API_BASE = 'http://localhost:8000';
+// const API_BASE = 'https://rag-app-v1ew.onrender.com';
+const API_BASE = 'http://localhost:8000';
 
 const RagContext = createContext<RagContextType | undefined>(undefined);
 
@@ -156,10 +160,11 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionLoading, setSessionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<RagMode>('hybrid');
-  const [model, setModel] = useState<LlmModel>('auto'); // ✨ Added model state
+  const [mode, setMode] = useState<RagMode>('documents');
+  const [model, setModel] = useState<LlmModel>('auto');
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [selectedDocumentIds, setSelectedDocumentIds] = useState<number[]>([]);
 
   const apiFetch = useCallback(async (path: string, init?: RequestInit): Promise<Response> => {
     const res = await fetch(`${API_BASE}${path}`, init);
@@ -278,6 +283,26 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [apiFetch, fetchDocuments]);
 
+  const uploadYoutubeVideo = useCallback(async (url: string): Promise<TaskResponse | null> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await apiFetch('/documents/youtube', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, model }),
+      });
+      const data: TaskResponse = await res.json();
+      await fetchDocuments();
+      return data;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [apiFetch, fetchDocuments, model]);
+
   const deleteDocument = useCallback(async (id: number) => {
     setIsLoading(true);
     setError(null);
@@ -296,11 +321,20 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       const sid = await ensureSession();
+      const payload = { 
+        question, 
+        history: chatHistory, 
+        mode, 
+        model, 
+        session_id: sid,
+        document_ids: selectedDocumentIds.length > 0 ? selectedDocumentIds : undefined 
+      };
+      
       const res = await apiFetch('/rag/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // ✨ Included model in the payload
-        body: JSON.stringify({ question, history: chatHistory, mode, model, session_id: sid }),
+        body: JSON.stringify(payload),
       });
       const data: RagResponse = await res.json();
 
@@ -327,11 +361,20 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const sid = await ensureSession();
+      const payload = { 
+        question, 
+        history: chatHistory, 
+        mode, 
+        model, 
+        session_id: sid,
+        document_ids: selectedDocumentIds.length > 0 ? selectedDocumentIds : undefined 
+      };
+      
       const res = await apiFetch('/rag/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // ✨ Included model in the payload
-        body: JSON.stringify({ question, history: chatHistory, mode, model, session_id: sid }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.body) throw new Error('No response body');
@@ -400,13 +443,24 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [apiFetch, chatHistory, ensureSession, fetchSessions, mode, model]);
 
+  const toggleSelectedDocument = useCallback((id: number) => {
+    setSelectedDocumentIds(prev => 
+      prev.includes(id) ? prev.filter(docId => docId !== id) : [...prev, id]
+    );
+  }, []);
+
+  const clearSelectedDocuments = useCallback(() => {
+    setSelectedDocumentIds([]);
+  }, []);
+
   return (
     <RagContext.Provider value={{
       documents, chatHistory, messages, isLoading, sessionLoading, error,
       mode, model, sessionId, sessions,
       setMode, setModel, clearHistory, setMessages,
+      selectedDocumentIds, toggleSelectedDocument, clearSelectedDocuments,
       fetchSessions, createSession, deleteSession, switchSession,
-      fetchDocuments, uploadDocument, deleteDocument,
+      fetchDocuments, uploadDocument, uploadYoutubeVideo, deleteDocument,
       askQuestion, askQuestionStream,
     }}>
       {children}
