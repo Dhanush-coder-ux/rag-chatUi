@@ -25,6 +25,7 @@ export interface Message {
   isError?: boolean;
   confidence?: number;
   traceId?: string;
+  modelUsed?: string;   // e.g. "gemini-2.5-flash" | "llama3"
 }
 
 export interface Conversation {

@@ -63,9 +63,10 @@ export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
   const canSubmit = value.trim().length > 0 && !isLoading;
 
   const modelOptions: { value: LlmModel; label: string; tag: string }[] = [
-    { value: 'auto',   label: 'Auto (Fallback)',  tag: 'AUTO'    },
-    { value: 'gemini', label: 'Gemini 2.5 Flash', tag: 'GEMINI'  },
-    { value: 'llama3', label: 'Llama 3 Local',    tag: 'LOCAL'   },
+    { value: 'auto',   label: 'Auto (Fallback)',         tag: 'AUTO'   },
+    { value: 'gemini', label: 'Gemini 2.5 Flash',        tag: 'GEMINI' },
+    { value: 'groq',   label: 'Groq (Llama 3.3 70B)',   tag: 'GROQ'   },
+    { value: 'llama3', label: 'Llama 3 Local (Ollama)',  tag: 'LOCAL'  },
   ];
   const selectedModel = modelOptions.find(o => o.value === model) || modelOptions[0];
 

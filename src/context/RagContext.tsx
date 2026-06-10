@@ -9,7 +9,7 @@ import { Message } from '../types';
 
 export type RagMode = 'documents' | 'web' | 'hybrid';
 export type ToolUsed = 'document' | 'web' | 'hybrid' | 'none';
-export type LlmModel = 'auto' | 'gemini' | 'llama3';
+export type LlmModel = 'auto' | 'gemini' | 'groq' | 'llama3';
 
 export interface HistoryMessage {
   role: 'user' | 'assistant';
@@ -40,6 +40,8 @@ export interface RagResponse {
 export interface Document {
   id: number;
   filename: string;
+  source_type: string;   // "file" | "youtube" | "web"
+  source_url: string | null;  // original YouTube/web URL
   created_at: string;
   [key: string]: unknown;
 }
@@ -72,6 +74,7 @@ export interface StreamCallbacks {
   onToolUsed?: (tool: ToolUsed) => void;
   onTraceId?: (traceId: string) => void;
   onMode?: (mode: RagMode) => void;
+  onModelUsed?: (model: string) => void;
   onDone?: () => void;
   onError?: (error: string) => void;
 }
@@ -434,6 +437,7 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
 
           if (eventType === 'trace') { cbs.onTraceId?.(rawData); continue; }
           if (eventType === 'mode') { cbs.onMode?.(rawData as RagMode); continue; }
+          if (eventType === 'model_used') { cbs.onModelUsed?.(rawData); continue; }
           if (eventType === 'tool_used') { cbs.onToolUsed?.(rawData as ToolUsed); continue; }
           if (eventType === 'step') {
             try { cbs.onStep?.(JSON.parse(rawData) as string); } catch { cbs.onStep?.(rawData); }

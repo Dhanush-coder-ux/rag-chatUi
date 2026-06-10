@@ -6,6 +6,7 @@ import { MessageList }     from './MessageList';
 import { ChatInput }       from './ChatInput';
 import { Dashboard }       from './Dashboard';
 import { DropZoneOverlay } from './FileUploadButton';
+import { KnowledgeBasePage } from './KnowledgeBasePage';
 import { useFileUpload }   from '../hooks/useFileUpload';
 import { Message, SourceItem } from '../types';
 import { useRagContext }   from '../context/RagContext';
@@ -22,7 +23,8 @@ function stepToIcon(step: string): 'search' | 'web' | 'brain' {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export const ChatLayout: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen]             = useState(true);
+  const [knowledgeBaseOpen, setKnowledgeBaseOpen] = useState(false);
   const { messages, setMessages, askQuestionStream, sessionLoading } = useRagContext();
   const streamingIdRef = useRef<string | null>(null);
   const { isDragging, handleDragEnter, handleDragLeave, handleDragOver, handleDrop } = useFileUpload();
@@ -98,6 +100,9 @@ export const ChatLayout: React.FC = () => {
       onTraceId: (traceId) => {
         patchMessage(assistantId, { traceId });
       },
+      onModelUsed: (modelUsed) => {
+        patchMessage(assistantId, { modelUsed });
+      },
       onDone: () => {
         setMessages((prev: Message[]) => prev.map(m => {
           if (m.id !== assistantId) return m;
@@ -153,6 +158,7 @@ export const ChatLayout: React.FC = () => {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         onOpen={() => setSidebarOpen(true)}
+        onOpenKnowledgeBase={() => setKnowledgeBaseOpen(true)}
       />
 
       {/* ── Main Workspace ─────────────────────────────────────────────────── */}
@@ -173,6 +179,11 @@ export const ChatLayout: React.FC = () => {
           <ChatInput onSubmit={handleSubmit} />
         </div>
       </main>
+
+      {/* ── Knowledge Base full-page overlay ─────────────────────────────────── */}
+      {knowledgeBaseOpen && (
+        <KnowledgeBasePage onClose={() => setKnowledgeBaseOpen(false)} />
+      )}
     </div>
   );
 };

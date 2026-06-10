@@ -6,7 +6,7 @@ import {
   ChevronDown,
   FileSpreadsheet, Image as ImageIcon, File,
   Database, BookOpen, Youtube,
-  Zap, PanelLeftClose,
+  Zap, PanelLeftClose, Maximize2,
 } from 'lucide-react';
 import { useRagContext, ChatSession } from '../context/RagContext';
 import { formatFileSize, getYoutubeVideoIdFromFilename, getYoutubeThumbnailUrl } from '../utils';
@@ -56,7 +56,10 @@ const FileEntry: React.FC<{
   onToggle: () => void;
 }> = ({ file, onRemove, isSelected, onToggle }) => {
   const filename = file.name || file.filename || `Document #${file.id}`;
-  const youtubeVideoId = getYoutubeVideoIdFromFilename(filename);
+  // Prefer source_url (the original YouTube link) over filename (which may be the video title)
+  const youtubeVideoId =
+    (file.source_url ? getYoutubeVideoIdFromFilename(file.source_url as string) : null)
+    ?? getYoutubeVideoIdFromFilename(filename);
   const thumbnailUrl = youtubeVideoId ? getYoutubeThumbnailUrl(youtubeVideoId, 'hq') : null;
   const watchUrl = youtubeVideoId ? `https://www.youtube.com/watch?v=${youtubeVideoId}` : null;
 
@@ -315,9 +318,10 @@ interface Props {
   open:    boolean;
   onClose: () => void;
   onOpen:  () => void;
+  onOpenKnowledgeBase: () => void;
 }
 
-export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen }) => {
+export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKnowledgeBase }) => {
   const {
     documents, deleteDocument, fetchDocuments,
     sessions, fetchSessions, createSession, deleteSession, switchSession,
@@ -483,6 +487,14 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen }) => {
                 style={documents.length > 0 || processingTasks.length > 0 ? { background: 'rgba(34,197,94,0.1)' } : { background: 'rgba(255,255,255,0.04)' }}>
                 {documents.length + processingTasks.length}
               </span>
+              {/* Expand to full page */}
+              <button
+                onClick={e => { e.stopPropagation(); onOpenKnowledgeBase(); }}
+                className="p-1 rounded hover:bg-sys-success/10 text-muted-foreground hover:text-sys-success transition-colors"
+                title="Open Knowledge Base"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+              </button>
               <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform duration-200
                 ${sourcesOpen ? 'rotate-0' : '-rotate-90'}`} />
             </div>
