@@ -116,7 +116,7 @@ interface RagContextType {
 }
 
 // const API_BASE = 'https://rag-app-v1ew.onrender.com'
-const API_BASE = 'http://localhost:8001';
+const API_BASE = '/api';
 
 const RagContext = createContext<RagContextType | undefined>(undefined);
 
