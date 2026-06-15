@@ -7,12 +7,25 @@ import {
 import { useRagContext, RagMode, LlmModel } from '../context/RagContext';
 import { FileUploadButton } from './FileUploadButton';
 import { YoutubeUploadButton } from './YoutubeUploadButton';
+import { VoiceRecorderWS } from './VoiceRecorderWS';
 
 interface Props {
   onSubmit: (question: string) => void;
+  isRecording?: boolean;
+  isProcessing?: boolean;
+  startRecording?: () => void;
+  stopRecording?: () => void;
+  statusText?: string;
 }
 
-export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
+export const ChatInput: React.FC<Props> = ({ 
+  onSubmit, 
+  isRecording = false, 
+  isProcessing = false, 
+  startRecording = () => {}, 
+  stopRecording = () => {},
+  statusText = ''
+}) => {
   const { isLoading, documents, mode, setMode, model, setModel, selectedDocumentIds, clearSelectedDocuments } = useRagContext();
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -228,17 +241,14 @@ export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
 
           {/* Right: Voice + Send */}
           <div className="shrink-0 flex items-center gap-1.5 mb-0.5">
-            <button
-              type="button"
-              className="w-8 h-8 flex items-center justify-center rounded-lg
-                text-muted-foreground hover:text-sys-cyan border border-sys-border
-                hover:border-sys-cyan/25 hover:bg-sys-cyan/6 transition-all"
-              title="Voice input (coming soon)"
-            >
-              <Mic className="w-4 h-4" />
-            </button>
+            <VoiceRecorderWS 
+              isRecording={isRecording}
+              isProcessing={isProcessing}
+              startRecording={startRecording}
+              stopRecording={stopRecording}
+            />
 
-            {isLoading ? (
+            {isLoading || isProcessing ? (
               <button
                 onClick={() => {/* TODO: abort */}}
                 className="w-9 h-9 flex items-center justify-center rounded-lg border transition-colors"
@@ -283,6 +293,7 @@ export const ChatInput: React.FC<Props> = ({ onSubmit }) => {
             <span className="w-1.5 h-1.5 rounded-full bg-sys-success" />
             <span className="system-label" style={{ fontSize: '9px' }}>
               VAATHI · {mode.toUpperCase()} MODE
+              {statusText && ` · ${statusText}`}
             </span>
           </div>
           <span className="system-label" style={{ fontSize: '9px' }}>

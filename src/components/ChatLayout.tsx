@@ -8,8 +8,9 @@ import { Dashboard }       from './Dashboard';
 import { DropZoneOverlay } from './FileUploadButton';
 import { KnowledgeBasePage } from './KnowledgeBasePage';
 import { useFileUpload }   from '../hooks/useFileUpload';
-import { Message, SourceItem } from '../types';
 import { useRagContext }   from '../context/RagContext';
+import { useVoiceWebSocket } from '../hooks/useVoiceWebSocket';
+import { Message, SourceItem } from '../types';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const makeId  = () => `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -25,9 +26,11 @@ function stepToIcon(step: string): 'search' | 'web' | 'brain' {
 export const ChatLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen]             = useState(true);
   const [knowledgeBaseOpen, setKnowledgeBaseOpen] = useState(false);
-  const { messages, setMessages, askQuestionStream, sessionLoading } = useRagContext();
+  const { messages, setMessages, askQuestionStream, sessionLoading, mode, model, selectedDocumentIds, sessionId, fetchSessions } = useRagContext();
   const streamingIdRef = useRef<string | null>(null);
   const { isDragging, handleDragEnter, handleDragLeave, handleDragOver, handleDrop } = useFileUpload();
+
+  const { isRecording, isProcessing, statusText, startRecording, stopRecording } = useVoiceWebSocket();
 
   const toggleSidebar = useCallback(() => setSidebarOpen(v => !v), []);
 
@@ -128,6 +131,47 @@ export const ChatLayout: React.FC = () => {
     handleSubmit(lastUser.content);
   }, [messages, handleSubmit]);
 
+  const handleStartVoice = () => {
+    const userMsg: Message = { id: makeId(), role: 'user', content: '...', timestamp: nowDate() };
+    const assistantId = makeId();
+    const assistantMsg: Message = { id: assistantId, role: 'assistant', content: '', timestamp: nowDate(), streamStatus: 'streaming', tools: [] };
+    
+    setMessages((prev: Message[]) => [...prev, userMsg, assistantMsg]);
+    
+    startRecording(
+      sessionId || null,
+      mode,
+      model,
+      selectedDocumentIds,
+      messages.map(m => ({ role: m.role, content: m.content })),
+      (text) => { patchMessage(userMsg.id, { content: text }); },
+      (chunkStr) => {
+         // handle rag chunk (same format as askQuestionStream)
+         if (chunkStr.startsWith("event: step") || chunkStr.startsWith("event: trace") || chunkStr.startsWith("event: mode") || chunkStr.startsWith("event: sources") || chunkStr.startsWith("event: tool_used") || chunkStr.startsWith("event: model_used")) {
+            // Very simplified parsing for voice mode
+            if (chunkStr.startsWith("event: sources")) {
+               try {
+                 const payload = chunkStr.split("data:")[1].trim();
+                 patchMessage(assistantId, { sources: JSON.parse(payload) });
+               } catch(e) {}
+            }
+         } else if (chunkStr.includes("data:")) {
+            const payload = chunkStr.split("data:")[1].trim();
+            if (payload && payload !== "[DONE]") {
+               try {
+                  const parsed = JSON.parse(payload);
+                  const token = typeof parsed === 'string' ? parsed : parsed.answer || parsed.content || '';
+                  setMessages((prev: Message[]) => prev.map(m => m.id === assistantId ? { ...m, content: m.content + token } : m));
+               } catch(e) {
+                  setMessages((prev: Message[]) => prev.map(m => m.id === assistantId ? { ...m, content: m.content + payload } : m));
+               }
+            }
+         }
+      },
+      (id) => { fetchSessions(); }
+    );
+  };
+
   const showDashboard = messages.length === 0 && !sessionLoading;
 
   return (
@@ -176,7 +220,14 @@ export const ChatLayout: React.FC = () => {
             />
           )}
 
-          <ChatInput onSubmit={handleSubmit} />
+          <ChatInput 
+            onSubmit={handleSubmit} 
+            isRecording={isRecording}
+            isProcessing={isProcessing}
+            startRecording={handleStartVoice}
+            stopRecording={stopRecording}
+            statusText={statusText}
+          />
         </div>
       </main>
 
