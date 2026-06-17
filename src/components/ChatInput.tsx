@@ -15,6 +15,7 @@ interface Props {
   isProcessing?: boolean;
   startRecording?: () => void;
   stopRecording?: () => void;
+  abortVoice?: () => void;
   statusText?: string;
 }
 
@@ -24,9 +25,10 @@ export const ChatInput: React.FC<Props> = ({
   isProcessing = false, 
   startRecording = () => {}, 
   stopRecording = () => {},
+  abortVoice,
   statusText = ''
 }) => {
-  const { isLoading, documents, mode, setMode, model, setModel, selectedDocumentIds, clearSelectedDocuments } = useRagContext();
+  const { isLoading, documents, mode, setMode, model, setModel, selectedDocumentIds, clearSelectedDocuments, stopGenerating } = useRagContext();
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -250,7 +252,10 @@ export const ChatInput: React.FC<Props> = ({
 
             {isLoading || isProcessing ? (
               <button
-                onClick={() => {/* TODO: abort */}}
+                onClick={() => {
+                  if (isProcessing && abortVoice) abortVoice();
+                  else if (isLoading) stopGenerating();
+                }}
                 className="w-9 h-9 flex items-center justify-center rounded-lg border transition-colors"
                 style={{
                   background: 'rgba(255,255,255,0.08)',

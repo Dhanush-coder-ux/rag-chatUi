@@ -26,9 +26,8 @@ export const useVoiceWebSocket = () => {
 
       // Construct WS URL
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      // In Vite, proxy might not handle WS properly out of the box if not configured, 
-      // but usually the backend is at port 8001. We'll use the API_URL logic from existing config if possible, 
-      const wsUrl = `${protocol}//localhost:8000/ws/voice`;
+      // Use window.location.host to work behind proxy or different ports
+      const wsUrl = `${protocol}//${window.location.host}/api/ws/voice`;
 
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
@@ -122,11 +121,21 @@ export const useVoiceWebSocket = () => {
     }
   }, [isRecording]);
 
+  const abortVoice = useCallback(() => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.close();
+    }
+    setIsProcessing(false);
+    setIsRecording(false);
+    setStatusText('Cancelled');
+  }, []);
+
   return {
     isRecording,
     isProcessing,
     statusText,
     startRecording,
-    stopRecording
+    stopRecording,
+    abortVoice
   };
 };

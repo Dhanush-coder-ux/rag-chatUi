@@ -3,6 +3,7 @@ import React, {
   useContext,
   useState,
   useCallback,
+  useRef,
   ReactNode,
 } from 'react';
 import { Message } from '../types';
@@ -112,6 +113,7 @@ interface RagContextType {
 
   askQuestion: (question: string) => Promise<RagResponse | null>;
   askQuestionStream: (question: string, cbs: StreamCallbacks) => Promise<void>;
+  stopGenerating: () => void;
   processingTasks: string[];
 }
 
@@ -169,6 +171,7 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<number[]>([]);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const [processingTasks, setProcessingTasks] = useState<string[]>([]);
 
@@ -404,11 +407,12 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
         document_ids: selectedDocumentIds.length > 0 ? selectedDocumentIds : undefined 
       };
       
+      abortControllerRef.current = new AbortController();
       const res = await apiFetch('/rag/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // ✨ Included model in the payload
         body: JSON.stringify(payload),
+        signal: abortControllerRef.current.signal,
       });
 
       if (!res.body) throw new Error('No response body');
@@ -470,13 +474,30 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
         }
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(msg);
-      cbs.onError?.(msg);
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        cbs.onChunk(' [Stopped]');
+        setChatHistory(prev => [
+          ...prev,
+          { role: 'user', content: question },
+          { role: 'assistant', content: fullAnswer + ' [Stopped]' },
+        ]);
+        cbs.onDone?.();
+      } else {
+        const msg = err instanceof Error ? err.message : String(err);
+        setError(msg);
+        cbs.onError?.(msg);
+      }
     } finally {
       setIsLoading(false);
+      abortControllerRef.current = null;
     }
   }, [apiFetch, chatHistory, ensureSession, fetchSessions, mode, model]);
+
+  const stopGenerating = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  }, []);
 
   const toggleSelectedDocument = useCallback((id: number) => {
     setSelectedDocumentIds(prev => 
@@ -496,7 +517,7 @@ export const RagProvider = ({ children }: { children: ReactNode }) => {
       selectedDocumentIds, toggleSelectedDocument, clearSelectedDocuments,
       fetchSessions, createSession, deleteSession, switchSession,
       fetchDocuments, uploadDocument, uploadYoutubeVideo, deleteDocument,
-      askQuestion, askQuestionStream, processingTasks,
+      askQuestion, askQuestionStream, stopGenerating, processingTasks,
     }}>
       {children}
     </RagContext.Provider>

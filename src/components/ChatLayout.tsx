@@ -11,6 +11,7 @@ import { useFileUpload }   from '../hooks/useFileUpload';
 import { useRagContext }   from '../context/RagContext';
 import { useVoiceWebSocket } from '../hooks/useVoiceWebSocket';
 import { Message, SourceItem } from '../types';
+import { VoiceRecordingOverlay } from './VoiceRecordingOverlay';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const makeId  = () => `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -30,10 +31,9 @@ export const ChatLayout: React.FC = () => {
   const streamingIdRef = useRef<string | null>(null);
   const { isDragging, handleDragEnter, handleDragLeave, handleDragOver, handleDrop } = useFileUpload();
 
-  const { isRecording, isProcessing, statusText, startRecording, stopRecording } = useVoiceWebSocket();
+  const { isRecording, isProcessing, statusText, startRecording, stopRecording, abortVoice } = useVoiceWebSocket();
 
   const toggleSidebar = useCallback(() => setSidebarOpen(v => !v), []);
-
   const patchMessage = useCallback((id: string, patch: Partial<Message>) => {
     setMessages((prev: Message[]) =>
       prev.map(m => m.id === id ? { ...m, ...patch } : m),
@@ -226,6 +226,7 @@ export const ChatLayout: React.FC = () => {
             isProcessing={isProcessing}
             startRecording={handleStartVoice}
             stopRecording={stopRecording}
+            abortVoice={abortVoice}
             statusText={statusText}
           />
         </div>
@@ -235,6 +236,13 @@ export const ChatLayout: React.FC = () => {
       {knowledgeBaseOpen && (
         <KnowledgeBasePage onClose={() => setKnowledgeBaseOpen(false)} />
       )}
+
+      {/* ── Voice Recording full-page overlay ─────────────────────────────────── */}
+      <VoiceRecordingOverlay 
+        isRecording={isRecording} 
+        statusText={statusText} 
+        onStopRecording={stopRecording} 
+      />
     </div>
   );
 };
