@@ -6,7 +6,7 @@ import 'react-pdf/dist/Page/TextLayer.css';
 import {
   X, Database, FileText, FileSpreadsheet, File, Youtube,
   Search, Trash, Upload, Loader2, RefreshCw,
-  ExternalLink, BookOpen,
+  ExternalLink, BookOpen, AlertTriangle, CheckCircle2, Clock,
 } from 'lucide-react';
 import { useRagContext, Document as DocType } from '../context/RagContext';
 import { PdfViewer } from './PdfViewer';
@@ -29,6 +29,34 @@ function getFileIcon(filename: string) {
   return <File className="w-5 h-5 text-zinc-400" />;
 }
 
+// ── Status badge helper ───────────────────────────────────────────────────────
+function StatusBadge({ status }: { status: DocType['status'] }) {
+  if (status === 'failed') {
+    return (
+      <div
+        className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10"
+        style={{ background: 'rgba(15,3,3,0.82)', backdropFilter: 'blur(2px)' }}
+      >
+        <AlertTriangle className="w-7 h-7 text-red-400" />
+        <span className="text-[10px] font-bold text-red-400 font-mono uppercase tracking-wider">Ingestion Failed</span>
+        <span className="text-[9px] text-red-400/70 font-mono">Delete &amp; re-upload</span>
+      </div>
+    );
+  }
+  if (status === 'processing') {
+    return (
+      <div
+        className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded z-10"
+        style={{ background: 'rgba(0,229,255,0.15)', border: '1px solid rgba(0,229,255,0.3)' }}
+      >
+        <Loader2 className="w-2.5 h-2.5 text-sys-cyan animate-spin" />
+        <span className="text-[9px] font-bold text-sys-cyan font-mono">PROCESSING</span>
+      </div>
+    );
+  }
+  return null;
+}
+
 // ── PDF Thumbnail card ───────────────────────────────────────────────────────
 const PdfCard: React.FC<{
   doc: DocType;
@@ -40,22 +68,28 @@ const PdfCard: React.FC<{
   const [numPages, setNumPages] = useState<number | null>(null);
   const [loadError, setLoadError] = useState(false);
   const fileUrl = `${API_BASE}/documents/${doc.id}/file`;
+  const isFailed = doc.status === 'failed';
 
   return (
     <div
-      className={`group relative flex flex-col rounded-xl border transition-all duration-200 overflow-hidden cursor-pointer ${
-        isSelected
-          ? 'border-sys-cyan/40 ring-1 ring-sys-cyan/20'
-          : 'border-sys-border hover:border-red-400/30'
+      className={`group relative flex flex-col rounded-xl border transition-all duration-200 overflow-hidden ${
+        isFailed
+          ? 'border-red-500/40 cursor-not-allowed opacity-80'
+          : isSelected
+            ? 'border-sys-cyan/40 ring-1 ring-sys-cyan/20 cursor-pointer'
+            : 'border-sys-border hover:border-red-400/30 cursor-pointer'
       }`}
       style={{ background: 'rgba(17,24,39,0.9)' }}
-      onClick={onToggle}
+      onClick={isFailed ? undefined : onToggle}
     >
       {/* PDF first-page thumbnail */}
       <div
         className="relative w-full bg-zinc-900 flex items-center justify-center overflow-hidden"
         style={{ height: '200px' }}
       >
+        {/* Status overlay (failed / processing) */}
+        <StatusBadge status={doc.status} />
+
         {!loadError ? (
           <Document
             file={fileUrl}
@@ -84,22 +118,24 @@ const PdfCard: React.FC<{
         )}
 
         {/* Open full viewer button overlay */}
-        <div
-          className="absolute inset-0 flex items-center justify-center
-            bg-black/0 group-hover:bg-black/50 transition-colors duration-200 opacity-0 group-hover:opacity-100"
-          onClick={e => { e.stopPropagation(); onOpen(); }}
-        >
+        {!isFailed && (
           <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
-            style={{ background: 'rgba(0,229,255,0.2)', border: '1px solid rgba(0,229,255,0.4)' }}
+            className="absolute inset-0 flex items-center justify-center
+              bg-black/0 group-hover:bg-black/50 transition-colors duration-200 opacity-0 group-hover:opacity-100"
+            onClick={e => { e.stopPropagation(); onOpen(); }}
           >
-            <ExternalLink className="w-3.5 h-3.5" />
-            View PDF
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
+              style={{ background: 'rgba(0,229,255,0.2)', border: '1px solid rgba(0,229,255,0.4)' }}
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              View PDF
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Selected indicator */}
-        {isSelected && (
+        {isSelected && !isFailed && (
           <div
             className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
             style={{ background: '#00E5FF' }}
@@ -124,9 +160,11 @@ const PdfCard: React.FC<{
       <div className="flex items-center justify-between px-3 py-2.5 gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium text-foreground truncate">{doc.filename}</p>
-          {numPages && (
+          {isFailed ? (
+            <p className="text-[10px] text-red-400/80 mt-0.5 font-mono">Embedding failed — re-upload</p>
+          ) : numPages ? (
             <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">{numPages} pages</p>
-          )}
+          ) : null}
         </div>
         <button
           onClick={e => { e.stopPropagation(); onDelete(); }}
@@ -149,6 +187,7 @@ const YoutubeCard: React.FC<{
   onDelete: () => void;
 }> = ({ doc, isSelected, onToggle, onDelete }) => {
   const filename = doc.filename || `Document #${doc.id}`;
+  const isFailed = doc.status === 'failed';
   const youtubeVideoId =
     (doc.source_url ? getYoutubeVideoIdFromFilename(doc.source_url as string) : null)
     ?? getYoutubeVideoIdFromFilename(filename);
@@ -157,15 +196,20 @@ const YoutubeCard: React.FC<{
 
   return (
     <div
-      className={`group relative flex flex-col rounded-xl border transition-all duration-200 overflow-hidden cursor-pointer ${
-        isSelected
-          ? 'border-sys-cyan/40 ring-1 ring-sys-cyan/20'
-          : 'border-sys-border hover:border-red-500/30'
+      className={`group relative flex flex-col rounded-xl border transition-all duration-200 overflow-hidden ${
+        isFailed
+          ? 'border-red-500/40 cursor-not-allowed opacity-80'
+          : isSelected
+            ? 'border-sys-cyan/40 ring-1 ring-sys-cyan/20 cursor-pointer'
+            : 'border-sys-border hover:border-red-500/30 cursor-pointer'
       }`}
       style={{ background: 'rgba(17,24,39,0.9)' }}
-      onClick={onToggle}
+      onClick={isFailed ? undefined : onToggle}
     >
       <div className="relative w-full aspect-video bg-zinc-900 overflow-hidden">
+        {/* Status overlay */}
+        <StatusBadge status={doc.status} />
+
         {thumbnailUrl && (
           <img
             src={thumbnailUrl}
@@ -176,22 +220,24 @@ const YoutubeCard: React.FC<{
         )}
 
         {/* Play button overlay */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
-          {watchUrl && (
-            <a
-              href={watchUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
-              className="w-12 h-12 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
-              style={{ background: 'rgba(255,0,0,0.9)', boxShadow: '0 0 20px rgba(255,0,0,0.5)' }}
-            >
-              <svg viewBox="0 0 24 24" className="w-6 h-6 fill-white ml-0.5">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </a>
-          )}
-        </div>
+        {!isFailed && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
+            {watchUrl && (
+              <a
+                href={watchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                className="w-12 h-12 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                style={{ background: 'rgba(255,0,0,0.9)', boxShadow: '0 0 20px rgba(255,0,0,0.5)' }}
+              >
+                <svg viewBox="0 0 24 24" className="w-6 h-6 fill-white ml-0.5">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </a>
+            )}
+          </div>
+        )}
 
         {/* YouTube badge */}
         <div
@@ -202,7 +248,7 @@ const YoutubeCard: React.FC<{
           <span className="text-[9px] font-bold text-white font-mono">YOUTUBE</span>
         </div>
 
-        {isSelected && (
+        {isSelected && !isFailed && (
           <div
             className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
             style={{ background: '#00E5FF' }}
@@ -215,7 +261,12 @@ const YoutubeCard: React.FC<{
       </div>
 
       <div className="flex items-center justify-between px-3 py-2.5 gap-2">
-        <p className="text-xs font-medium text-foreground truncate flex-1">{filename}</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium text-foreground truncate">{filename}</p>
+          {isFailed && (
+            <p className="text-[10px] text-red-400/80 mt-0.5 font-mono">Ingestion failed — delete &amp; retry</p>
+          )}
+        </div>
         <button
           onClick={e => { e.stopPropagation(); onDelete(); }}
           className="shrink-0 p-1 rounded opacity-0 group-hover:opacity-100
@@ -237,28 +288,38 @@ const GenericCard: React.FC<{
   onDelete: () => void;
 }> = ({ doc, isSelected, onToggle, onDelete }) => {
   const filename = doc.filename || `Document #${doc.id}`;
+  const isFailed = doc.status === 'failed';
   return (
     <div
-      onClick={onToggle}
-      className={`group relative flex items-center gap-3 px-4 py-3.5 rounded-xl border cursor-pointer transition-all ${
-        isSelected
-          ? 'border-sys-cyan/40 bg-sys-cyan/8'
-          : 'border-sys-border hover:border-sys-border hover:bg-white/4'
+      onClick={isFailed ? undefined : onToggle}
+      className={`group relative flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-all ${
+        isFailed
+          ? 'border-red-500/40 cursor-not-allowed opacity-80'
+          : isSelected
+            ? 'border-sys-cyan/40 bg-sys-cyan/8 cursor-pointer'
+            : 'border-sys-border hover:border-sys-border hover:bg-white/4 cursor-pointer'
       }`}
     >
       <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-sys-border"
-        style={{ background: 'rgba(255,255,255,0.05)' }}
+        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+          isFailed ? 'border-red-500/30' : 'border-sys-border'
+        }`}
+        style={{ background: isFailed ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.05)' }}
       >
-        {getFileIcon(filename)}
+        {isFailed
+          ? <AlertTriangle className="w-5 h-5 text-red-400" />
+          : getFileIcon(filename)
+        }
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground truncate">{filename}</p>
-        <p className="text-[10px] text-muted-foreground mt-0.5 font-mono uppercase">
-          {filename.split('.').pop() ?? 'file'} · Document
+        <p className={`text-[10px] mt-0.5 font-mono uppercase ${
+          isFailed ? 'text-red-400/80' : 'text-muted-foreground'
+        }`}>
+          {isFailed ? 'Embedding failed — delete & re-upload' : `${filename.split('.').pop() ?? 'file'} · Document`}
         </p>
       </div>
-      {isSelected && (
+      {isSelected && !isFailed && (
         <div
           className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
           style={{ background: '#00E5FF' }}
@@ -459,6 +520,27 @@ export const KnowledgeBasePage: React.FC<Props> = memo(({ onClose }) => {
               </p>
             </div>
           )}
+
+          {/* Failed documents banner */}
+          {(() => {
+            const failedCount = filtered.filter(d => d.status === 'failed').length;
+            return failedCount > 0 ? (
+              <div
+                className="flex items-start gap-3 px-4 py-3 rounded-xl border border-red-500/30"
+                style={{ background: 'rgba(239,68,68,0.06)' }}
+              >
+                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-red-400">
+                    {failedCount} document{failedCount > 1 ? 's' : ''} failed to ingest
+                  </p>
+                  <p className="text-xs text-red-400/70 mt-0.5 font-mono">
+                    Embedding failed (usually a temporary API error). Delete the failed document{failedCount > 1 ? 's' : ''} and re-upload.
+                  </p>
+                </div>
+              </div>
+            ) : null;
+          })()}
 
           {/* Empty state */}
           {filtered.length === 0 && processingTasks.length === 0 && (

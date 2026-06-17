@@ -41,6 +41,7 @@ export interface RagResponse {
 export interface Document {
   id: number;
   filename: string;
+  status: 'processing' | 'ready' | 'failed'; // ingestion status
   source_type: string;   // "file" | "youtube" | "web"
   source_url: string | null;  // original YouTube/web URL
   created_at: string;
