@@ -24,6 +24,10 @@ export const useVoiceWebSocket = () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioPlayerRef.current.stop(); // reset player
 
+      // Show overlay immediately — don't wait for WS handshake
+      setIsRecording(true);
+      setStatusText('Connecting...');
+
       // Construct WS URL
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       // Use window.location.host to work behind proxy or different ports
@@ -53,7 +57,6 @@ export const useVoiceWebSocket = () => {
         };
 
         mediaRecorder.start(250); // Capture chunks every 250ms
-        setIsRecording(true);
         setStatusText('Recording...');
       };
 

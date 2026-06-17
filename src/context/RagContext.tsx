@@ -117,8 +117,8 @@ interface RagContextType {
   processingTasks: string[];
 }
 
-// const API_BASE = 'https://rag-app-v1ew.onrender.com'
-const API_BASE = '/api';
+const API_BASE = 'https://rag-app-v1ew.onrender.com'
+// const API_BASE = '/api';
 // const API_BASE = "http://localhost:8000";
 const RagContext = createContext<RagContextType | undefined>(undefined);
 

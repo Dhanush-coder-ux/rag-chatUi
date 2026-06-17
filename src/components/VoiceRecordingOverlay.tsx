@@ -2,7 +2,7 @@ import React from 'react';
 import Lottie from 'lottie-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Square } from 'lucide-react';
-import micAnimation from '../../public/lottie_animations/mic animation with circle.json';
+import micAnimation from '../lottie_animations/mic animation with circle.json';
 
 interface VoiceRecordingOverlayProps {
   isRecording: boolean;
