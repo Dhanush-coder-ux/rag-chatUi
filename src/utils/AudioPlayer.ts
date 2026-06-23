@@ -1,43 +1,61 @@
+/**
+ * AudioPlayer — plays audio chunks (MP3/WebM) received from the backend TTS.
+ * Uses HTMLAudioElement with object URLs for broad browser compatibility,
+ * since decoding MP3 chunks via AudioContext is unreliable across browsers.
+ */
 export class AudioPlayer {
-  private audioContext: AudioContext;
-  private nextTime: number;
+  private queue: string[] = [];   // Object URLs pending playback
+  private playing = false;
+  private currentAudio: HTMLAudioElement | null = null;
+  private stopped = false;
 
-  constructor() {
-    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    this.nextTime = 0;
+  private async playNext() {
+    if (this.playing || this.stopped || this.queue.length === 0) return;
+    this.playing = true;
+    const url = this.queue.shift()!;
+    const audio = new Audio(url);
+    this.currentAudio = audio;
+    audio.onended = () => {
+      URL.revokeObjectURL(url);
+      this.playing = false;
+      this.currentAudio = null;
+      this.playNext();
+    };
+    audio.onerror = (e) => {
+      console.error('AudioPlayer playback error', e);
+      URL.revokeObjectURL(url);
+      this.playing = false;
+      this.currentAudio = null;
+      this.playNext();
+    };
+    try {
+      await audio.play();
+    } catch (e) {
+      console.error('AudioPlayer play() rejected', e);
+      this.playing = false;
+      this.playNext();
+    }
   }
 
   async playChunk(arrayBuffer: ArrayBuffer) {
-    if (this.audioContext.state === 'suspended') {
-      await this.audioContext.resume();
-    }
-
-    try {
-      // Decode the audio chunk
-      const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer.slice(0));
-      const source = this.audioContext.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(this.audioContext.destination);
-
-      const currentTime = this.audioContext.currentTime;
-      
-      // Ensure we don't schedule in the past
-      if (this.nextTime < currentTime) {
-        this.nextTime = currentTime + 0.1; // Small buffer for initial chunk
-      }
-
-      source.start(this.nextTime);
-      this.nextTime += audioBuffer.duration;
-    } catch (e) {
-      console.error('Failed to decode audio chunk', e);
-    }
+    if (this.stopped) return;
+    const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+    const url = URL.createObjectURL(blob);
+    this.queue.push(url);
+    this.playNext();
   }
 
   stop() {
-    if (this.audioContext.state !== 'closed') {
-      this.audioContext.close();
+    this.stopped = true;
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio = null;
     }
-    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    this.nextTime = 0;
+    // Revoke any pending URLs
+    this.queue.forEach(url => URL.revokeObjectURL(url));
+    this.queue = [];
+    this.playing = false;
+    // Reset for next session
+    this.stopped = false;
   }
 }

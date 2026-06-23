@@ -10,7 +10,7 @@ import { Message } from '../types';
 
 export type RagMode = 'documents' | 'web' | 'hybrid';
 export type ToolUsed = 'document' | 'web' | 'hybrid' | 'none';
-export type LlmModel = 'auto' | 'gemini' | 'groq' | 'llama3';
+export type LlmModel = 'auto' | 'gemini' | 'groq' | 'nvidia';
 
 export interface HistoryMessage {
   role: 'user' | 'assistant';

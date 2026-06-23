@@ -19,12 +19,12 @@ interface Props {
   statusText?: string;
 }
 
-export const ChatInput: React.FC<Props> = ({ 
-  onSubmit, 
-  isRecording = false, 
-  isProcessing = false, 
-  startRecording = () => {}, 
-  stopRecording = () => {},
+export const ChatInput: React.FC<Props> = ({
+  onSubmit,
+  isRecording = false,
+  isProcessing = false,
+  startRecording = () => { },
+  stopRecording = () => { },
   abortVoice,
   statusText = ''
 }) => {
@@ -33,7 +33,7 @@ export const ChatInput: React.FC<Props> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isModelOpen, setIsModelOpen] = useState(false);
-  const [isFocused, setIsFocused]     = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     const ta = textareaRef.current;
@@ -71,17 +71,17 @@ export const ChatInput: React.FC<Props> = ({
   );
 
   const placeholder =
-    mode === 'web'    ? 'Search the web with VAATHI...' :
-    mode === 'hybrid' ? 'Ask anything — Web + Docs mode active...' :
-                        'Ask VAATHI...';
+    mode === 'web' ? 'Search the web with VAATHI...' :
+      mode === 'hybrid' ? 'Ask anything — Web + Docs mode active...' :
+        'Ask VAATHI...';
 
   const canSubmit = value.trim().length > 0 && !isLoading;
 
   const modelOptions: { value: LlmModel; label: string; tag: string }[] = [
-    { value: 'auto',   label: 'Auto (Fallback)',         tag: 'AUTO'   },
-    { value: 'gemini', label: 'Gemini 2.5 Flash',        tag: 'GEMINI' },
-    { value: 'groq',   label: 'Groq (Llama 3.3 70B)',   tag: 'GROQ'   },
-    { value: 'llama3', label: 'Llama 3 Local (Ollama)',  tag: 'LOCAL'  },
+    { value: 'auto', label: 'Auto (Fallback)', tag: 'AUTO' },
+    { value: 'gemini', label: 'Gemini 2.5 Flash', tag: 'GEMINI' },
+    { value: 'groq', label: 'Groq (Llama 3.3 70B)', tag: 'GROQ' },
+    { value: 'nvidia', label: 'NVIDIA · GLM-5.1 (NIM)', tag: 'NVIDIA' },
   ];
   const selectedModel = modelOptions.find(o => o.value === model) || modelOptions[0];
 
@@ -122,7 +122,7 @@ export const ChatInput: React.FC<Props> = ({
             onClick={() => setIsModelOpen(!isModelOpen)}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-sys-border
               text-[11px] font-mono font-medium text-muted-foreground
-              hover:text-sys-cyan hover:border-sys-cyan/25 hover:bg-sys-cyan/5
+              hover:text-sys-green hover:border-sys-green/25 hover:bg-sys-green/5
               disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <Cpu className="w-3 h-3" />
@@ -147,17 +147,17 @@ export const ChatInput: React.FC<Props> = ({
                     className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg
                       text-xs font-medium text-left transition-colors
                       ${model === option.value
-                        ? 'text-sys-cyan'
+                        ? 'text-sys-green'
                         : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                       }`}
-                    style={model === option.value ? { background: 'rgba(0,229,255,0.08)' } : {}}
+                    style={model === option.value ? { background: 'rgba(118,185,0,0.08)' } : {}}
                   >
                     <div>
                       <p className="font-semibold">{option.label}</p>
                       <p className="system-label mt-0.5" style={{ fontSize: '8px' }}>{option.tag}</p>
                     </div>
                     {model === option.value && (
-                      <Check className="w-3.5 h-3.5 text-sys-cyan" />
+                      <Check className="w-3.5 h-3.5 text-sys-green" />
                     )}
                   </button>
                 ))}
@@ -169,10 +169,10 @@ export const ChatInput: React.FC<Props> = ({
 
       {/* ── Selected doc filter tag ──────────────────────────────────────── */}
       {mode === 'documents' && selectedDocumentIds.length > 0 && (
-        <div className="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-lg border border-sys-cyan/25"
-          style={{ background: 'rgba(0,229,255,0.06)' }}>
-          <FileText className="w-3.5 h-3.5 text-sys-cyan" />
-          <span className="text-[11px] text-sys-cyan font-mono font-medium">
+        <div className="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-lg border border-sys-green/25"
+          style={{ background: 'rgba(118,185,0,0.06)' }}>
+          <FileText className="w-3.5 h-3.5 text-sys-green" />
+          <span className="text-[11px] text-sys-green font-mono font-medium">
             TARGETING {selectedDocumentIds.length} DOCUMENT{selectedDocumentIds.length !== 1 ? 'S' : ''}
           </span>
           <button
@@ -186,8 +186,8 @@ export const ChatInput: React.FC<Props> = ({
 
       {mode === 'documents' && documents.length > 0 && selectedDocumentIds.length === 0 && (
         <div className="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-lg border border-sys-border"
-          style={{ background: 'rgba(0,229,255,0.03)' }}>
-          <FileText className="w-3.5 h-3.5 text-sys-cyan/60" />
+          style={{ background: 'rgba(118,185,0,0.03)' }}>
+          <FileText className="w-3.5 h-3.5 text-sys-green/60" />
           <span className="text-[11px] text-muted-foreground font-mono">
             SEARCHING ALL {documents.length} DOCUMENT{documents.length !== 1 ? 'S' : ''}
           </span>
@@ -201,16 +201,16 @@ export const ChatInput: React.FC<Props> = ({
           background: 'rgba(17,24,39,0.85)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderColor: isFocused ? 'rgba(0,229,255,0.35)' : '#1E293B',
+          borderColor: isFocused ? 'rgba(118,185,0,0.35)' : '#1E293B',
           boxShadow: isFocused
-            ? '0 0 20px rgba(0,229,255,0.2), 0 0 0 1px rgba(0,229,255,0.1), 0 4px 24px rgba(0,0,0,0.4)'
+            ? '0 0 20px rgba(118,185,0,0.2), 0 0 0 1px rgba(118,185,0,0.1), 0 4px 24px rgba(0,0,0,0.4)'
             : '0 4px 24px rgba(0,0,0,0.3)',
         }}
       >
         {/* Top accent line when focused */}
         {isFocused && (
           <div className="absolute top-0 inset-x-0 h-px rounded-t-xl"
-            style={{ background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.5), transparent)' }} />
+            style={{ background: 'linear-gradient(90deg, transparent, rgba(118,185,0,0.5), transparent)' }} />
         )}
 
         {/* Input row */}
@@ -243,7 +243,7 @@ export const ChatInput: React.FC<Props> = ({
 
           {/* Right: Voice + Send */}
           <div className="shrink-0 flex items-center gap-1.5 mb-0.5">
-            <VoiceRecorderWS 
+            <VoiceRecorderWS
               isRecording={isRecording}
               isProcessing={isProcessing}
               startRecording={startRecording}
@@ -275,9 +275,9 @@ export const ChatInput: React.FC<Props> = ({
                     : 'cursor-not-allowed opacity-40'
                   }`}
                 style={canSubmit ? {
-                  background: 'linear-gradient(135deg, #00E5FF, #0891B2)',
-                  borderColor: 'rgba(0,229,255,0.3)',
-                  boxShadow: '0 0 12px rgba(0,229,255,0.3)',
+                  background: 'linear-gradient(135deg, #76b900, #4A7A00)',
+                  borderColor: 'rgba(118,185,0,0.3)',
+                  boxShadow: '0 0 12px rgba(118,185,0,0.3)',
                   color: '#020617',
                 } : {
                   background: 'rgba(255,255,255,0.06)',
@@ -318,11 +318,11 @@ export const ChatInput: React.FC<Props> = ({
 
 // ── Mode Button ───────────────────────────────────────────────────────────────
 interface ModeButtonProps {
-  active:  boolean;
+  active: boolean;
   onClick: () => void;
-  icon:    React.ReactNode;
-  label:   string;
-  count?:  number;
+  icon: React.ReactNode;
+  label: string;
+  count?: number;
 }
 
 const ModeButton: React.FC<ModeButtonProps> = ({ active, onClick, icon, label, count }) => (
@@ -331,18 +331,18 @@ const ModeButton: React.FC<ModeButtonProps> = ({ active, onClick, icon, label, c
     className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-medium
       transition-all duration-200 border
       ${active
-        ? 'text-sys-cyan border-sys-cyan/30'
+        ? 'text-sys-green border-sys-green/30'
         : 'border-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground hover:border-sys-border'
       }`}
-    style={active ? { background: 'rgba(0,229,255,0.08)' } : {}}
+    style={active ? { background: 'rgba(118,185,0,0.08)' } : {}}
   >
     {icon}
     <span>{label}</span>
     {count !== undefined && count > 0 && (
       <span className={`ml-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold font-mono
-        ${active ? 'text-sys-cyan' : 'text-muted-foreground'}`}
+        ${active ? 'text-sys-green' : 'text-muted-foreground'}`}
         style={active
-          ? { background: 'rgba(0,229,255,0.15)' }
+          ? { background: 'rgba(118,185,0,0.15)' }
           : { background: 'rgba(255,255,255,0.06)' }
         }>
         {count}

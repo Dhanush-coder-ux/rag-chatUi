@@ -28,7 +28,7 @@ const getFileIcon = (filename: string) => {
   if (ext === 'pdf')
     return <FileText className="w-3.5 h-3.5 text-red-400" />;
   if (['doc', 'docx', 'txt'].includes(ext))
-    return <FileText className="w-3.5 h-3.5 text-sys-cyan" />;
+    return <FileText className="w-3.5 h-3.5 text-sys-green" />;
   if (['png', 'jpg', 'jpeg', 'gif', 'svg'].includes(ext))
     return <ImageIcon className="w-3.5 h-3.5 text-purple-400" />;
   return <File className="w-3.5 h-3.5 text-zinc-400" />;
@@ -71,7 +71,7 @@ const FileEntry: React.FC<{
         className={`group relative flex flex-col rounded-xl overflow-hidden cursor-pointer
           border transition-all duration-200
           ${isSelected
-            ? 'border-sys-cyan/40 ring-1 ring-sys-cyan/20'
+            ? 'border-sys-green/40 ring-1 ring-sys-green/20'
             : 'border-sys-border hover:border-red-500/40'
           }`}
         style={{ background: 'rgba(17,24,39,0.9)' }}
@@ -125,7 +125,7 @@ const FileEntry: React.FC<{
           {/* Selected indicator */}
           {isSelected && (
             <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center"
-              style={{ background: '#00E5FF' }}>
+              style={{ background: '#76b900' }}>
               <svg viewBox="0 0 24 24" className="w-2.5 h-2.5 fill-[#020617]">
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
               </svg>
@@ -158,7 +158,7 @@ const FileEntry: React.FC<{
       className={`group relative flex items-center gap-2.5 px-3 py-2 rounded-lg
         transition-all cursor-pointer border
         ${isSelected
-          ? 'bg-sys-cyan/10 border-sys-cyan/30'
+          ? 'bg-sys-green/10 border-sys-green/30'
           : 'border-transparent hover:bg-white/5 hover:border-sys-border'
         }`}
     >
@@ -204,22 +204,22 @@ const ChatItem: React.FC<ChatItemProps> = ({ session, isActive, isLoading, onSel
       className={`group relative flex items-center justify-between px-3 py-2.5 rounded-lg
         cursor-pointer transition-all duration-200 border
         ${isActive
-          ? 'bg-sys-cyan/8 border-sys-cyan/20 text-foreground'
+          ? 'bg-sys-green/8 border-sys-green/20 text-foreground'
           : 'border-transparent text-muted-foreground hover:bg-white/4 hover:text-foreground hover:border-sys-border'
         }`}
-      style={isActive ? { background: 'rgba(0,229,255,0.07)', borderLeftColor: 'rgba(0,229,255,0.3)' } : {}}
+      style={isActive ? { background: 'rgba(118,185,0,0.07)', borderLeftColor: 'rgba(118,185,0,0.3)' } : {}}
     >
       {/* Left accent bar for active */}
       {isActive && (
-        <div className="absolute left-0 top-1 bottom-1 w-0.5 rounded-full bg-sys-cyan" />
+        <div className="absolute left-0 top-1 bottom-1 w-0.5 rounded-full bg-sys-green" />
       )}
 
       <div className="flex items-center gap-2.5 flex-1 min-w-0 pl-1.5">
         <div className={`shrink-0 w-6 h-6 rounded-md flex items-center justify-center
-          ${isActive ? 'bg-sys-cyan/15' : 'bg-white/5'}`}>
+          ${isActive ? 'bg-sys-green/15' : 'bg-white/5'}`}>
           {isActive && isLoading
-            ? <Loader2 className="w-3 h-3 text-sys-cyan animate-spin" />
-            : <MessageSquare className={`w-3 h-3 ${isActive ? 'text-sys-cyan' : 'text-muted-foreground group-hover:text-foreground'}`} />
+            ? <Loader2 className="w-3 h-3 text-sys-green animate-spin" />
+            : <MessageSquare className={`w-3 h-3 ${isActive ? 'text-sys-green' : 'text-muted-foreground group-hover:text-foreground'}`} />
           }
         </div>
         <div className="flex-1 min-w-0">
@@ -285,7 +285,7 @@ const SessionListContent: React.FC<{
   if (isLoading && sessions.length === 0) {
     return (
       <div className="flex items-center gap-2 px-3 py-2">
-        <Loader2 className="w-3 h-3 animate-spin text-sys-cyan" />
+        <Loader2 className="w-3 h-3 animate-spin text-sys-green" />
         <span className="text-[11px] text-muted-foreground font-mono">Initializing…</span>
       </div>
     );
@@ -380,11 +380,11 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKno
           background: 'rgba(15,23,42,0.92)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          boxShadow: '4px 0 24px rgba(0,0,0,0.5), inset -1px 0 0 rgba(0,229,255,0.05)',
+          boxShadow: '4px 0 24px rgba(0,0,0,0.5), inset -1px 0 0 rgba(118,185,0,0.05)',
         }}
       >
         {/* Subtle top cyan shimmer */}
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-sys-cyan/30 to-transparent" />
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-sys-green/30 to-transparent" />
 
         {/* ── AI Identity Header ──────────────────────────────────────────── */}
         <div className="relative px-4 pt-5 pb-4 shrink-0 border-b border-sys-border">
@@ -392,8 +392,8 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKno
             <div className="flex items-center gap-3">
               {/* Logo / Pulse */}
               <div className="relative w-9 h-9 shrink-0">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border border-sys-cyan/25"
-                  style={{ background: 'rgba(0,229,255,0.08)', boxShadow: '0 0 12px rgba(0,229,255,0.2)' }}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border border-sys-green/25"
+                  style={{ background: 'rgba(118,185,0,0.08)', boxShadow: '0 0 12px rgba(118,185,0,0.2)' }}>
                   <img src="/images/vaathi.png" alt="Vaathi" className="w-full h-full object-contain p-1" />
                 </div>
                 {/* Status pulse */}
@@ -435,8 +435,8 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKno
               font-semibold text-sm text-[#020617]
               transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              background: 'linear-gradient(135deg, #00E5FF 0%, #0891B2 100%)',
-              boxShadow: '0 0 15px rgba(0,229,255,0.3), 0 4px 12px rgba(0,0,0,0.3)',
+              background: 'linear-gradient(135deg, #76b900 0%, #4A7A00 100%)',
+              boxShadow: '0 0 15px rgba(118,185,0,0.3), 0 4px 12px rgba(0,0,0,0.3)',
             }}
           >
             <div className="flex items-center gap-2">
@@ -477,7 +477,7 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKno
             </div>
             <div className="flex items-center gap-2">
               {processingTasks.length > 0 && (
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-sys-cyan" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-sys-green" />
               )}
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full font-mono
                 ${documents.length > 0 || processingTasks.length > 0
@@ -505,13 +505,13 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKno
               scrollbar-thin animate-in slide-in-from-bottom-2 fade-in duration-200">
               
               {processingTasks.map(taskId => (
-                <div key={taskId} className="group relative flex items-center gap-2.5 px-3 py-2 rounded-lg border border-sys-cyan/30 bg-sys-cyan/5">
-                  <div className="shrink-0 w-7 h-7 rounded-md bg-white/5 border border-sys-cyan/30 flex items-center justify-center">
-                    <Loader2 className="w-3.5 h-3.5 text-sys-cyan animate-spin" />
+                <div key={taskId} className="group relative flex items-center gap-2.5 px-3 py-2 rounded-lg border border-sys-green/30 bg-sys-green/5">
+                  <div className="shrink-0 w-7 h-7 rounded-md bg-white/5 border border-sys-green/30 flex items-center justify-center">
+                    <Loader2 className="w-3.5 h-3.5 text-sys-green animate-spin" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium text-sys-cyan truncate leading-tight">Processing document...</p>
-                    <p className="text-[10px] text-sys-cyan/70 mt-0.5">Please wait</p>
+                    <p className="text-[11px] font-medium text-sys-green truncate leading-tight">Processing document...</p>
+                    <p className="text-[10px] text-sys-green/70 mt-0.5">Please wait</p>
                   </div>
                 </div>
               ))}
@@ -550,8 +550,8 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKno
         <div className="border-t border-sys-border px-4 py-3 shrink-0 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[#020617] text-xs font-bold shrink-0"
             style={{
-              background: 'linear-gradient(135deg, #00E5FF, #0891B2)',
-              boxShadow: '0 0 8px rgba(0,229,255,0.3)',
+              background: 'linear-gradient(135deg, #76b900, #4A7A00)',
+              boxShadow: '0 0 8px rgba(118,185,0,0.3)',
             }}>
             D
           </div>

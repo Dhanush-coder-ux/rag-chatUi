@@ -15,10 +15,10 @@ const SessionLoadingState: React.FC = () => (
   <div className="flex flex-col items-center justify-center h-full gap-4 select-none">
     <div className="relative">
       <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-        style={{ background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.2)' }}>
-        <Loader2 className="w-6 h-6 text-sys-cyan animate-spin" />
+        style={{ background: 'rgba(118,185,0,0.08)', border: '1px solid rgba(118,185,0,0.2)' }}>
+        <Loader2 className="w-6 h-6 text-sys-green animate-spin" />
       </div>
-      <div className="absolute -inset-2 rounded-2xl border border-sys-cyan/20 animate-ping" />
+      <div className="absolute -inset-2 rounded-2xl border border-sys-green/20 animate-ping" />
     </div>
     <div className="text-center">
       <p className="text-sm font-semibold text-foreground font-mono">Loading Conversation</p>

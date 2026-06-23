@@ -17,14 +17,14 @@ const actionCards = [
     title: 'Summarize Documents',
     desc: 'Extract key insights from your knowledge base',
     prompt: 'Summarize the main points from all my documents',
-    color: '#00E5FF',
+    color: '#76b900',
   },
   {
     icon: Search,
     title: 'Analyze Research',
     desc: 'Deep-dive analysis on any research topic',
     prompt: 'Analyze and break down the research from my documents',
-    color: '#0891B2',
+    color: '#4A7A00',
   },
   {
     icon: BarChart3,
@@ -120,8 +120,8 @@ export const Dashboard: React.FC = () => {
           className="space-y-2"
         >
           <div className="flex items-center gap-2 mb-4">
-            <Terminal className="w-4 h-4 text-sys-cyan" />
-            <span className="system-label text-sys-cyan" style={{ color: '#00E5FF' }}>VAATHI OS v2.0 — INITIALIZED</span>
+            <Terminal className="w-4 h-4 text-sys-green" />
+            <span className="system-label text-sys-green" style={{ color: '#76b900' }}>VAATHI OS v2.0 — INITIALIZED</span>
           </div>
 
           <h1 className="text-[13px] font-mono font-semibold tracking-widest text-muted-foreground uppercase">
@@ -129,7 +129,7 @@ export const Dashboard: React.FC = () => {
           </h1>
           <h2 className="text-5xl font-bold text-foreground" style={{ letterSpacing: '-0.03em', lineHeight: 1.1 }}>
             Dhanush
-            <span className="inline-block w-1.5 h-10 ml-2 align-bottom bg-sys-cyan animate-blink" />
+            <span className="inline-block w-1.5 h-10 ml-2 align-bottom bg-sys-green animate-blink" />
           </h2>
           <p className="text-muted-foreground text-base max-w-lg mt-3">
             Your AI research operating system is ready. What do you want to explore today?
@@ -187,7 +187,7 @@ export const Dashboard: React.FC = () => {
             style={{ background: 'rgba(17,24,39,0.8)' }}
           >
             <div className="flex items-center gap-2 mb-4">
-              <Zap className="w-3.5 h-3.5 text-sys-cyan" />
+              <Zap className="w-3.5 h-3.5 text-sys-green" />
               <span className="system-label">KNOWLEDGE OVERVIEW</span>
             </div>
             <div className="grid grid-cols-2 gap-3">

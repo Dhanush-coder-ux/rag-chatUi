@@ -32,15 +32,15 @@ export const VoiceRecordingOverlay: React.FC<VoiceRecordingOverlayProps> = ({
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
             className="relative w-72 h-72 flex items-center justify-center pointer-events-none"
           >
-            <Lottie 
-              animationData={micAnimation} 
-              loop={true} 
+            <Lottie
+              animationData={micAnimation}
+              loop={true}
               className="absolute inset-0 w-full h-full scale-[1.5]"
             />
           </motion.div>
 
           {/* Status Text */}
-          <motion.h2 
+          <motion.h2
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
@@ -53,7 +53,7 @@ export const VoiceRecordingOverlay: React.FC<VoiceRecordingOverlayProps> = ({
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="mt-3 text-sys-cyan/90 font-mono text-sm uppercase tracking-widest animate-pulse"
+            className="mt-3 text-sys-green/90 font-mono text-sm uppercase tracking-widest animate-pulse"
           >
             Speak your message
           </motion.p>
@@ -66,10 +66,10 @@ export const VoiceRecordingOverlay: React.FC<VoiceRecordingOverlayProps> = ({
             onClick={onStopRecording}
             className="mt-12 group relative flex items-center justify-center w-20 h-20 rounded-full bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.4)] hover:shadow-[0_0_50px_rgba(239,68,68,0.6)] transition-all duration-300"
           >
-             <Square className="w-8 h-8 text-red-500 fill-current group-hover:scale-95 transition-transform" />
-             <span className="absolute -bottom-8 text-xs font-mono text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                STOP & SEND
-             </span>
+            <Square className="w-8 h-8 text-red-500 fill-current group-hover:scale-95 transition-transform" />
+            <span className="absolute -bottom-8 text-xs font-mono text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+              STOP & SEND
+            </span>
           </motion.button>
         </motion.div>
       )}

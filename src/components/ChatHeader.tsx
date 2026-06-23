@@ -17,12 +17,12 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
       backdropFilter: 'blur(20px)',
       WebkitBackdropFilter: 'blur(20px)',
       borderBottom: '1px solid rgba(30,41,59,0.8)',
-      boxShadow: '0 1px 0 rgba(0,229,255,0.06), 0 4px 24px rgba(0,0,0,0.4)',
+      boxShadow: '0 1px 0 rgba(118,185,0,0.06), 0 4px 24px rgba(0,0,0,0.4)',
     }}>
       {/* Active processing glow bar */}
       {isLoading && (
         <div className="absolute bottom-0 inset-x-0 h-px overflow-hidden">
-          <div className="h-full w-1/3 bg-gradient-to-r from-transparent via-sys-cyan to-transparent
+          <div className="h-full w-1/3 bg-gradient-to-r from-transparent via-sys-green to-transparent
             animate-[shimmer_1.4s_ease_infinite]"
             style={{ backgroundSize: '200% 100%' }} />
         </div>
@@ -35,8 +35,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
             onClick={onToggleSidebar}
             aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
             className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg
-              text-muted-foreground hover:text-sys-cyan hover:bg-sys-cyan/8
-              transition-all duration-200 border border-transparent hover:border-sys-cyan/20"
+              text-muted-foreground hover:text-sys-green hover:bg-sys-green/8
+              transition-all duration-200 border border-transparent hover:border-sys-green/20"
           >
             {sidebarOpen
               ? <PanelLeftClose className="w-4 h-4" />
@@ -50,13 +50,13 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
                 VAATHI SYSTEM
               </span>
               {isLoading && (
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full border border-sys-cyan/30 animate-in fade-in"
-                  style={{ background: 'rgba(0,229,255,0.08)' }}>
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full border border-sys-green/30 animate-in fade-in"
+                  style={{ background: 'rgba(118,185,0,0.08)' }}>
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sys-cyan/75" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-sys-cyan" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sys-green/75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-sys-green" />
                   </span>
-                  <span className="text-[10px] text-sys-cyan font-mono font-semibold">PROCESSING</span>
+                  <span className="text-[10px] text-sys-green font-mono font-semibold">PROCESSING</span>
                 </div>
               )}
             </div>

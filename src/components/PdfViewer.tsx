@@ -47,7 +47,7 @@ export const PdfViewer: React.FC<Props> = ({ url, filename, onClose }) => {
         }`}
         style={{
           background: 'rgba(15,23,42,0.97)',
-          boxShadow: '0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,229,255,0.08)',
+          boxShadow: '0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(118,185,0,0.08)',
         }}
       >
         {/* ── Header ──────────────────────────────────────────────────────────── */}
@@ -77,14 +77,14 @@ export const PdfViewer: React.FC<Props> = ({ url, filename, onClose }) => {
             <a
               href={url}
               download={filename}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-sys-cyan hover:bg-sys-cyan/8 transition-colors"
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-sys-green hover:bg-sys-green/8 transition-colors"
               title="Download PDF"
             >
               <Download className="w-4 h-4" />
             </a>
             <button
               onClick={() => setFullscreen(f => !f)}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-sys-cyan hover:bg-sys-cyan/8 transition-colors"
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-sys-green hover:bg-sys-green/8 transition-colors"
               title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
             >
               {fullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -129,7 +129,7 @@ export const PdfViewer: React.FC<Props> = ({ url, filename, onClose }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={zoomOut}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-sys-cyan hover:bg-sys-cyan/8 transition-colors"
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-sys-green hover:bg-sys-green/8 transition-colors"
               title="Zoom out"
             >
               <ZoomOut className="w-4 h-4" />
@@ -139,7 +139,7 @@ export const PdfViewer: React.FC<Props> = ({ url, filename, onClose }) => {
             </span>
             <button
               onClick={zoomIn}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-sys-cyan hover:bg-sys-cyan/8 transition-colors"
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-sys-green hover:bg-sys-green/8 transition-colors"
               title="Zoom in"
             >
               <ZoomIn className="w-4 h-4" />
@@ -154,7 +154,7 @@ export const PdfViewer: React.FC<Props> = ({ url, filename, onClose }) => {
             onLoadSuccess={onLoadSuccess}
             loading={
               <div className="flex flex-col items-center gap-3 py-20">
-                <div className="w-10 h-10 rounded-full border-2 border-sys-cyan/30 border-t-sys-cyan animate-spin" />
+                <div className="w-10 h-10 rounded-full border-2 border-sys-green/30 border-t-sys-green animate-spin" />
                 <p className="text-sm text-muted-foreground font-mono">Loading PDF…</p>
               </div>
             }
@@ -168,7 +168,7 @@ export const PdfViewer: React.FC<Props> = ({ url, filename, onClose }) => {
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sys-cyan text-xs underline"
+                  className="text-sys-green text-xs underline"
                 >
                   Try opening directly
                 </a>
@@ -197,10 +197,10 @@ export const PdfViewer: React.FC<Props> = ({ url, filename, onClose }) => {
                 onClick={() => setPage(p)}
                 className={`shrink-0 w-8 h-8 rounded text-[10px] font-mono font-bold transition-all ${
                   p === page
-                    ? 'text-sys-cyan'
+                    ? 'text-sys-green'
                     : 'text-muted-foreground hover:text-foreground hover:bg-white/8'
                 }`}
-                style={p === page ? { background: 'rgba(0,229,255,0.12)' } : {}}
+                style={p === page ? { background: 'rgba(118,185,0,0.12)' } : {}}
               >
                 {p}
               </button>

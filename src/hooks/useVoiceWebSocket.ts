@@ -8,7 +8,9 @@ export const useVoiceWebSocket = () => {
 
   const wsRef = useRef<WebSocket | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioPlayerRef = useRef<AudioPlayer>(new AudioPlayer());
+  // Lazily initialize AudioPlayer to avoid AudioContext issues before user gesture
+  const audioPlayerRef = useRef<AudioPlayer | null>(null);
+  const isRecordingRef = useRef(false);
 
   const startRecording = useCallback(async (
     sessionId: number | null,
@@ -21,11 +23,23 @@ export const useVoiceWebSocket = () => {
     onSessionId: (id: number) => void
   ) => {
     try {
+      // Ensure mediaDevices API is available (requires HTTPS or localhost)
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setStatusText('Microphone not supported in this browser/context');
+        return;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioPlayerRef.current.stop(); // reset player
+
+      // Lazily create / reset the AudioPlayer on each recording session
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.stop();
+      }
+      audioPlayerRef.current = new AudioPlayer();
 
       // Show overlay immediately — don't wait for WS handshake
       setIsRecording(true);
+      isRecordingRef.current = true;
       setStatusText('Connecting...');
 
       // Construct WS URL
@@ -64,7 +78,7 @@ export const useVoiceWebSocket = () => {
         if (event.data instanceof Blob) {
           // Audio chunk from backend TTS
           const arrayBuffer = await event.data.arrayBuffer();
-          audioPlayerRef.current.playChunk(arrayBuffer);
+          audioPlayerRef.current?.playChunk(arrayBuffer);
         } else {
           try {
             const data = JSON.parse(event.data);
@@ -101,19 +115,35 @@ export const useVoiceWebSocket = () => {
       ws.onclose = () => {
         setIsProcessing(false);
         setIsRecording(false);
+        isRecordingRef.current = false;
       };
 
-    } catch (err) {
-      console.error('Failed to start recording', err);
-      setStatusText('Microphone permission denied');
+    } catch (err: any) {
+      console.error('Failed to start recording:', err);
+      // Provide a meaningful error message based on the actual error
+      if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
+        setStatusText('Microphone permission denied');
+      } else if (err?.name === 'NotFoundError') {
+        setStatusText('No microphone found');
+      } else if (err?.name === 'NotReadableError') {
+        setStatusText('Microphone is already in use');
+      } else {
+        setStatusText(`Error: ${err?.message || 'Could not start recording'}`);
+      }
     }
   }, []);
 
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    // Use ref to avoid stale closure on isRecording state
+    if (mediaRecorderRef.current && isRecordingRef.current) {
+      try {
+        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      } catch (e) {
+        console.warn('Error stopping media recorder:', e);
+      }
       setIsRecording(false);
+      isRecordingRef.current = false;
       setIsProcessing(true);
       setStatusText('Processing audio...');
 
@@ -122,14 +152,23 @@ export const useVoiceWebSocket = () => {
         wsRef.current.send("EOF");
       }
     }
-  }, [isRecording]);
+  }, []);
 
   const abortVoice = useCallback(() => {
+    if (mediaRecorderRef.current && isRecordingRef.current) {
+      try {
+        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      } catch (e) {
+        console.warn('Error stopping media recorder on abort:', e);
+      }
+    }
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.close();
     }
     setIsProcessing(false);
     setIsRecording(false);
+    isRecordingRef.current = false;
     setStatusText('Cancelled');
   }, []);
 

@@ -17,7 +17,7 @@
     --popover:             222 47% 6%;      /* #0F172A */
     --popover-foreground:  210 40% 98%;
 
-    --primary:             186 100% 50%;    /* #00E5FF — System Cyan */
+    --primary:             186 100% 50%;    /* #76b900 — System Cyan */
     --primary-foreground:  222 47% 4%;
 
     --secondary:           215 28% 12%;     /* #0F172A */
@@ -34,7 +34,7 @@
 
     --border:              215 28% 17%;     /* #1E293B */
     --input:               215 28% 14%;
-    --ring:                186 100% 50%;    /* #00E5FF */
+    --ring:                186 100% 50%;    /* #76b900 */
 
     --radius:              0.5rem;
 
@@ -66,8 +66,8 @@
   /* ─── Scrollbars ─────────────────────────────────────────────────────────── */
   ::-webkit-scrollbar        { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track  { background: transparent; }
-  ::-webkit-scrollbar-thumb  { background: rgba(0,229,255,0.15); border-radius: 9999px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(0,229,255,0.3); }
+  ::-webkit-scrollbar-thumb  { background: rgba(118,185,0,0.15); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(118,185,0,0.3); }
 
   code, pre, kbd {
     font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
@@ -86,13 +86,13 @@
   /* ─── Cyber Border (cyan inner glow) ────────────────────────────────────── */
   .cyber-border {
     border: 1px solid #1E293B;
-    box-shadow: inset 0 0 0 1px rgba(0,229,255,0.04);
+    box-shadow: inset 0 0 0 1px rgba(118,185,0,0.04);
   }
 
   /* ─── Cyan Glow Border (focused) ────────────────────────────────────────── */
   .cyber-border-active {
-    border: 1px solid rgba(0,229,255,0.4);
-    box-shadow: 0 0 15px rgba(0,229,255,0.2), inset 0 0 0 1px rgba(0,229,255,0.08);
+    border: 1px solid rgba(118,185,0,0.4);
+    box-shadow: 0 0 15px rgba(118,185,0,0.2), inset 0 0 0 1px rgba(118,185,0,0.08);
   }
 
   /* ─── System Label (monospace uppercase) ───────────────────────────────── */
@@ -107,7 +107,7 @@
 
   /* ─── Cyan Text Gradient ─────────────────────────────────────────────────── */
   .text-gradient-cyan {
-    background: linear-gradient(135deg, #00E5FF 0%, #0891B2 100%);
+    background: linear-gradient(135deg, #76b900 0%, #4A7A00 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -115,20 +115,20 @@
 
   /* ─── Active Nav Item ────────────────────────────────────────────────────── */
   .nav-active {
-    background: rgba(0,229,255,0.08);
-    border-left: 2px solid #00E5FF;
-    box-shadow: inset 4px 0 12px rgba(0,229,255,0.06);
+    background: rgba(118,185,0,0.08);
+    border-left: 2px solid #76b900;
+    box-shadow: inset 4px 0 12px rgba(118,185,0,0.06);
   }
 
   /* ─── Scrollbar thin utility ─────────────────────────────────────────────── */
   .scrollbar-thin::-webkit-scrollbar { width: 3px; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(0,229,255,0.12); border-radius: 9999px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(118,185,0,0.12); border-radius: 9999px; }
 
   /* ─── Ambient Grid Background ────────────────────────────────────────────── */
   .grid-bg {
     background-image:
-      linear-gradient(rgba(0,229,255,0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,255,0.035) 1px, transparent 1px);
+      linear-gradient(rgba(118,185,0,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(118,185,0,0.035) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 
@@ -155,7 +155,7 @@
     right: -80px;
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 65%);
+    background: radial-gradient(circle, rgba(118,185,0,0.08) 0%, transparent 65%);
     filter: blur(60px);
     pointer-events: none;
     z-index: 0;
@@ -198,11 +198,11 @@
   }
 
   .msg-assistant {
-    background: rgba(0,229,255,0.05);
-    border-left: 3px solid #00E5FF;
-    border-top: 1px solid rgba(0,229,255,0.12);
-    border-right: 1px solid rgba(0,229,255,0.06);
-    border-bottom: 1px solid rgba(0,229,255,0.06);
+    background: rgba(118,185,0,0.05);
+    border-left: 3px solid #76b900;
+    border-top: 1px solid rgba(118,185,0,0.12);
+    border-right: 1px solid rgba(118,185,0,0.06);
+    border-bottom: 1px solid rgba(118,185,0,0.06);
   }
 
   /* ─── Quick Action Card ──────────────────────────────────────────────────── */
@@ -213,8 +213,8 @@
   }
   .action-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 0 25px rgba(0,229,255,0.25), 0 12px 40px rgba(0,0,0,0.5);
-    border-color: rgba(0,229,255,0.3);
+    box-shadow: 0 0 25px rgba(118,185,0,0.25), 0 12px 40px rgba(0,0,0,0.5);
+    border-color: rgba(118,185,0,0.3);
     background: rgba(17, 24, 39, 0.95);
   }
 }
@@ -226,12 +226,12 @@
 }
 
 .prose.prose-invert a {
-  color: #00E5FF;
+  color: #76b900;
 }
 
 .prose.prose-invert code {
-  color: #00E5FF;
-  background: rgba(0,229,255,0.08);
+  color: #76b900;
+  background: rgba(118,185,0,0.08);
   padding: 0.1em 0.3em;
   border-radius: 4px;
   font-size: 0.875em;
@@ -243,7 +243,7 @@
 }
 
 .prose.prose-invert blockquote {
-  border-left-color: #00E5FF;
+  border-left-color: #76b900;
   color: #94A3B8;
 }
 
@@ -274,7 +274,7 @@
   75%, 100% { transform: scale(2.2); opacity: 0; }
 }
 
-@keyframes pulse-cyan {
-  0%, 100% { box-shadow: 0 0 6px 2px rgba(0,229,255,0.6); opacity: 1; }
-  50%      { box-shadow: 0 0 12px 4px rgba(0,229,255,0.3); opacity: 0.7; }
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 6px 2px rgba(118,185,0,0.6); opacity: 1; }
+  50%      { box-shadow: 0 0 12px 4px rgba(118,185,0,0.3); opacity: 0.7; }
 }

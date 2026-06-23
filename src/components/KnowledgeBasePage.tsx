@@ -47,10 +47,10 @@ function StatusBadge({ status }: { status: DocType['status'] }) {
     return (
       <div
         className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded z-10"
-        style={{ background: 'rgba(0,229,255,0.15)', border: '1px solid rgba(0,229,255,0.3)' }}
+        style={{ background: 'rgba(118,185,0,0.15)', border: '1px solid rgba(118,185,0,0.3)' }}
       >
-        <Loader2 className="w-2.5 h-2.5 text-sys-cyan animate-spin" />
-        <span className="text-[9px] font-bold text-sys-cyan font-mono">PROCESSING</span>
+        <Loader2 className="w-2.5 h-2.5 text-sys-green animate-spin" />
+        <span className="text-[9px] font-bold text-sys-green font-mono">PROCESSING</span>
       </div>
     );
   }
@@ -76,7 +76,7 @@ const PdfCard: React.FC<{
         isFailed
           ? 'border-red-500/40 cursor-not-allowed opacity-80'
           : isSelected
-            ? 'border-sys-cyan/40 ring-1 ring-sys-cyan/20 cursor-pointer'
+            ? 'border-sys-green/40 ring-1 ring-sys-green/20 cursor-pointer'
             : 'border-sys-border hover:border-red-400/30 cursor-pointer'
       }`}
       style={{ background: 'rgba(17,24,39,0.9)' }}
@@ -97,7 +97,7 @@ const PdfCard: React.FC<{
             onLoadError={() => setLoadError(true)}
             loading={
               <div className="flex items-center justify-center w-full h-full">
-                <Loader2 className="w-6 h-6 text-sys-cyan animate-spin" />
+                <Loader2 className="w-6 h-6 text-sys-green animate-spin" />
               </div>
             }
             error={null}
@@ -126,7 +126,7 @@ const PdfCard: React.FC<{
           >
             <div
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
-              style={{ background: 'rgba(0,229,255,0.2)', border: '1px solid rgba(0,229,255,0.4)' }}
+              style={{ background: 'rgba(118,185,0,0.2)', border: '1px solid rgba(118,185,0,0.4)' }}
             >
               <ExternalLink className="w-3.5 h-3.5" />
               View PDF
@@ -138,7 +138,7 @@ const PdfCard: React.FC<{
         {isSelected && !isFailed && (
           <div
             className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
-            style={{ background: '#00E5FF' }}
+            style={{ background: '#76b900' }}
           >
             <svg viewBox="0 0 24 24" className="w-3 h-3 fill-[#020617]">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
@@ -200,7 +200,7 @@ const YoutubeCard: React.FC<{
         isFailed
           ? 'border-red-500/40 cursor-not-allowed opacity-80'
           : isSelected
-            ? 'border-sys-cyan/40 ring-1 ring-sys-cyan/20 cursor-pointer'
+            ? 'border-sys-green/40 ring-1 ring-sys-green/20 cursor-pointer'
             : 'border-sys-border hover:border-red-500/30 cursor-pointer'
       }`}
       style={{ background: 'rgba(17,24,39,0.9)' }}
@@ -251,7 +251,7 @@ const YoutubeCard: React.FC<{
         {isSelected && !isFailed && (
           <div
             className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
-            style={{ background: '#00E5FF' }}
+            style={{ background: '#76b900' }}
           >
             <svg viewBox="0 0 24 24" className="w-3 h-3 fill-[#020617]">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
@@ -296,7 +296,7 @@ const GenericCard: React.FC<{
         isFailed
           ? 'border-red-500/40 cursor-not-allowed opacity-80'
           : isSelected
-            ? 'border-sys-cyan/40 bg-sys-cyan/8 cursor-pointer'
+            ? 'border-sys-green/40 bg-sys-green/8 cursor-pointer'
             : 'border-sys-border hover:border-sys-border hover:bg-white/4 cursor-pointer'
       }`}
     >
@@ -322,7 +322,7 @@ const GenericCard: React.FC<{
       {isSelected && !isFailed && (
         <div
           className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-          style={{ background: '#00E5FF' }}
+          style={{ background: '#76b900' }}
         >
           <svg viewBox="0 0 24 24" className="w-3 h-3 fill-[#020617]">
             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
@@ -413,7 +413,7 @@ export const KnowledgeBasePage: React.FC<Props> = memo(({ onClose }) => {
         }}
       >
         {/* Top shimmer */}
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-sys-cyan/30 to-transparent" />
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-sys-green/30 to-transparent" />
 
         {/* ── Header ────────────────────────────────────────────────────────── */}
         <div className="px-8 pt-8 pb-5 border-b border-sys-border shrink-0">
@@ -438,7 +438,7 @@ export const KnowledgeBasePage: React.FC<Props> = memo(({ onClose }) => {
               {/* Refresh */}
               <button
                 onClick={handleRefresh}
-                className="p-2 rounded-lg text-muted-foreground hover:text-sys-cyan hover:bg-sys-cyan/8 transition-colors"
+                className="p-2 rounded-lg text-muted-foreground hover:text-sys-green hover:bg-sys-green/8 transition-colors"
                 title="Refresh"
               >
                 <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -449,9 +449,9 @@ export const KnowledgeBasePage: React.FC<Props> = memo(({ onClose }) => {
                 className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer
                   text-xs font-medium transition-all"
                 style={{
-                  background: 'rgba(0,229,255,0.1)',
-                  border: '1px solid rgba(0,229,255,0.25)',
-                  color: '#00E5FF',
+                  background: 'rgba(118,185,0,0.1)',
+                  border: '1px solid rgba(118,185,0,0.25)',
+                  color: '#76b900',
                 }}
                 title="Upload PDF or TXT"
               >
@@ -499,7 +499,7 @@ export const KnowledgeBasePage: React.FC<Props> = memo(({ onClose }) => {
                 placeholder-muted-foreground outline-none transition-all border"
               style={{
                 background: 'rgba(17,24,39,0.8)',
-                borderColor: search ? 'rgba(0,229,255,0.3)' : '#1E293B',
+                borderColor: search ? 'rgba(118,185,0,0.3)' : '#1E293B',
               }}
             />
           </div>
@@ -511,11 +511,11 @@ export const KnowledgeBasePage: React.FC<Props> = memo(({ onClose }) => {
           {/* Processing indicator */}
           {processingTasks.length > 0 && (
             <div
-              className="flex items-center gap-3 px-4 py-3 rounded-xl border border-sys-cyan/30"
-              style={{ background: 'rgba(0,229,255,0.05)' }}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl border border-sys-green/30"
+              style={{ background: 'rgba(118,185,0,0.05)' }}
             >
-              <Loader2 className="w-4 h-4 text-sys-cyan animate-spin shrink-0" />
-              <p className="text-sm text-sys-cyan font-medium">
+              <Loader2 className="w-4 h-4 text-sys-green animate-spin shrink-0" />
+              <p className="text-sm text-sys-green font-medium">
                 {processingTasks.length} document{processingTasks.length > 1 ? 's' : ''} processing…
               </p>
             </div>
@@ -656,8 +656,8 @@ export const KnowledgeBasePage: React.FC<Props> = memo(({ onClose }) => {
           </div>
           {selectedDocumentIds.length > 0 && (
             <span
-              className="text-[10px] font-bold px-2.5 py-1 rounded font-mono text-sys-cyan"
-              style={{ background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.2)' }}
+              className="text-[10px] font-bold px-2.5 py-1 rounded font-mono text-sys-green"
+              style={{ background: 'rgba(118,185,0,0.1)', border: '1px solid rgba(118,185,0,0.2)' }}
             >
               {selectedDocumentIds.length} SELECTED — ACTIVE FILTER
             </span>

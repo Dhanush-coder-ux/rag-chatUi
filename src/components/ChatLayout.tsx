@@ -1,31 +1,31 @@
 // components/ChatLayout.tsx — VAATHI OS Shell
 import React, { useState, useCallback, useRef } from 'react';
-import { Sidebar }         from './Sidebar';
-import { ChatHeader }      from './ChatHeader';
-import { MessageList }     from './MessageList';
-import { ChatInput }       from './ChatInput';
-import { Dashboard }       from './Dashboard';
+import { Sidebar } from './Sidebar';
+import { ChatHeader } from './ChatHeader';
+import { MessageList } from './MessageList';
+import { ChatInput } from './ChatInput';
+import { Dashboard } from './Dashboard';
 import { DropZoneOverlay } from './FileUploadButton';
 import { KnowledgeBasePage } from './KnowledgeBasePage';
-import { useFileUpload }   from '../hooks/useFileUpload';
-import { useRagContext }   from '../context/RagContext';
+import { useFileUpload } from '../hooks/useFileUpload';
+import { useRagContext } from '../context/RagContext';
 import { useVoiceWebSocket } from '../hooks/useVoiceWebSocket';
 import { Message, SourceItem } from '../types';
 import { VoiceRecordingOverlay } from './VoiceRecordingOverlay';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const makeId  = () => `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const makeId = () => `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const nowDate = () => new Date();
 
 function stepToIcon(step: string): 'search' | 'web' | 'brain' {
-  if (step.includes('🌐') || step.toLowerCase().includes('web'))  return 'web';
-  if (step.includes('📄') || step.toLowerCase().includes('doc'))  return 'search';
+  if (step.includes('🌐') || step.toLowerCase().includes('web')) return 'web';
+  if (step.includes('📄') || step.toLowerCase().includes('doc')) return 'search';
   return 'brain';
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export const ChatLayout: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen]             = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [knowledgeBaseOpen, setKnowledgeBaseOpen] = useState(false);
   const { messages, setMessages, askQuestionStream, sessionLoading, mode, model, selectedDocumentIds, sessionId, fetchSessions } = useRagContext();
   const streamingIdRef = useRef<string | null>(null);
@@ -42,19 +42,19 @@ export const ChatLayout: React.FC = () => {
 
   const handleSubmit = useCallback(async (question: string) => {
     const userMsg: Message = {
-      id:        makeId(),
-      role:      'user',
-      content:   question,
+      id: makeId(),
+      role: 'user',
+      content: question,
       timestamp: nowDate(),
     };
     const assistantId = makeId();
     const assistantMsg: Message = {
-      id:           assistantId,
-      role:         'assistant',
-      content:      '',
-      timestamp:    nowDate(),
+      id: assistantId,
+      role: 'assistant',
+      content: '',
+      timestamp: nowDate(),
       streamStatus: 'streaming',
-      tools:        [],
+      tools: [],
     };
     streamingIdRef.current = assistantId;
     setMessages((prev: Message[]) => [...prev, userMsg, assistantMsg]);
@@ -91,9 +91,9 @@ export const ChatLayout: React.FC = () => {
             tools: [
               ...existing.map(t => ({ ...t, status: 'done' as const })),
               {
-                id:     makeId(),
-                label:  typeof toolUsed === 'string' ? toolUsed : String(toolUsed),
-                icon:   stepToIcon(typeof toolUsed === 'string' ? toolUsed : ''),
+                id: makeId(),
+                label: typeof toolUsed === 'string' ? toolUsed : String(toolUsed),
+                icon: stepToIcon(typeof toolUsed === 'string' ? toolUsed : ''),
                 status: 'done' as const,
               },
             ],
@@ -135,9 +135,9 @@ export const ChatLayout: React.FC = () => {
     const userMsg: Message = { id: makeId(), role: 'user', content: '...', timestamp: nowDate() };
     const assistantId = makeId();
     const assistantMsg: Message = { id: assistantId, role: 'assistant', content: '', timestamp: nowDate(), streamStatus: 'streaming', tools: [] };
-    
+
     setMessages((prev: Message[]) => [...prev, userMsg, assistantMsg]);
-    
+
     startRecording(
       sessionId || null,
       mode,
@@ -146,27 +146,27 @@ export const ChatLayout: React.FC = () => {
       messages.map(m => ({ role: m.role, content: m.content })),
       (text) => { patchMessage(userMsg.id, { content: text }); },
       (chunkStr) => {
-         // handle rag chunk (same format as askQuestionStream)
-         if (chunkStr.startsWith("event: step") || chunkStr.startsWith("event: trace") || chunkStr.startsWith("event: mode") || chunkStr.startsWith("event: sources") || chunkStr.startsWith("event: tool_used") || chunkStr.startsWith("event: model_used")) {
-            // Very simplified parsing for voice mode
-            if (chunkStr.startsWith("event: sources")) {
-               try {
-                 const payload = chunkStr.split("data:")[1].trim();
-                 patchMessage(assistantId, { sources: JSON.parse(payload) });
-               } catch(e) {}
+        // handle rag chunk (same format as askQuestionStream)
+        if (chunkStr.startsWith("event: step") || chunkStr.startsWith("event: trace") || chunkStr.startsWith("event: mode") || chunkStr.startsWith("event: sources") || chunkStr.startsWith("event: tool_used") || chunkStr.startsWith("event: model_used")) {
+          // Very simplified parsing for voice mode
+          if (chunkStr.startsWith("event: sources")) {
+            try {
+              const payload = chunkStr.split("data:")[1].trim();
+              patchMessage(assistantId, { sources: JSON.parse(payload) });
+            } catch (e) { }
+          }
+        } else if (chunkStr.includes("data:")) {
+          const payload = chunkStr.split("data:")[1].trim();
+          if (payload && payload !== "[DONE]") {
+            try {
+              const parsed = JSON.parse(payload);
+              const token = typeof parsed === 'string' ? parsed : parsed.answer || parsed.content || '';
+              setMessages((prev: Message[]) => prev.map(m => m.id === assistantId ? { ...m, content: m.content + token } : m));
+            } catch (e) {
+              setMessages((prev: Message[]) => prev.map(m => m.id === assistantId ? { ...m, content: m.content + payload } : m));
             }
-         } else if (chunkStr.includes("data:")) {
-            const payload = chunkStr.split("data:")[1].trim();
-            if (payload && payload !== "[DONE]") {
-               try {
-                  const parsed = JSON.parse(payload);
-                  const token = typeof parsed === 'string' ? parsed : parsed.answer || parsed.content || '';
-                  setMessages((prev: Message[]) => prev.map(m => m.id === assistantId ? { ...m, content: m.content + token } : m));
-               } catch(e) {
-                  setMessages((prev: Message[]) => prev.map(m => m.id === assistantId ? { ...m, content: m.content + payload } : m));
-               }
-            }
-         }
+          }
+        }
       },
       (id) => { fetchSessions(); }
     );
@@ -195,7 +195,7 @@ export const ChatLayout: React.FC = () => {
       <div className="scan-line-overlay fixed inset-0 pointer-events-none z-0" />
 
       {/* ── Drop Zone Overlay ──────────────────────────────────────────────── */}
-      <DropZoneOverlay visible={isDragging} onDrop={() => {}} />
+      <DropZoneOverlay visible={isDragging} onDrop={() => { }} />
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
       <Sidebar
@@ -220,8 +220,8 @@ export const ChatLayout: React.FC = () => {
             />
           )}
 
-          <ChatInput 
-            onSubmit={handleSubmit} 
+          <ChatInput
+            onSubmit={handleSubmit}
             isRecording={isRecording}
             isProcessing={isProcessing}
             startRecording={handleStartVoice}
@@ -238,10 +238,10 @@ export const ChatLayout: React.FC = () => {
       )}
 
       {/* ── Voice Recording full-page overlay ─────────────────────────────────── */}
-      <VoiceRecordingOverlay 
-        isRecording={isRecording} 
-        statusText={statusText} 
-        onStopRecording={stopRecording} 
+      <VoiceRecordingOverlay
+        isRecording={isRecording}
+        statusText={statusText}
+        onStopRecording={stopRecording}
       />
     </div>
   );

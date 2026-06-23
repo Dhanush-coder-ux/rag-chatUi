@@ -11,7 +11,7 @@ import { copyToClipboard, formatTimestamp, extractYoutubeVideoId, getYoutubeThum
 
 // ── Streaming Cursor ──────────────────────────────────────────────────────────
 const StreamingCursor = () => (
-  <span className="inline-block w-1.5 h-4 ml-1 align-middle bg-sys-cyan animate-blink" />
+  <span className="inline-block w-1.5 h-4 ml-1 align-middle bg-sys-green animate-blink" />
 );
 
 // ── Tool Step ─────────────────────────────────────────────────────────────────
@@ -26,13 +26,13 @@ const ToolStep: React.FC<{ tool: ToolUse }> = ({ tool }) => (
   <div className="flex items-center gap-2.5 py-1 text-xs animate-in fade-in slide-in-from-left-2 duration-300 font-mono">
     <div className={`flex items-center justify-center w-5 h-5 rounded ${
       tool.status === 'running'
-        ? 'bg-sys-cyan/15 text-sys-cyan'
+        ? 'bg-sys-green/15 text-sys-green'
         : 'bg-sys-success/15 text-sys-success'
     }`}>
       <ToolIcon icon={tool.icon} />
     </div>
     <span className="text-[11px]" style={{
-      color: tool.status === 'running' ? '#00E5FF' : '#94A3B8',
+      color: tool.status === 'running' ? '#76b900' : '#94A3B8',
     }}>
       {tool.label}
     </span>
@@ -41,7 +41,7 @@ const ToolStep: React.FC<{ tool: ToolUse }> = ({ tool }) => (
         {[0, 1, 2].map(i => (
           <span
             key={i}
-            className="w-1 h-1 rounded-full bg-sys-cyan animate-bounce"
+            className="w-1 h-1 rounded-full bg-sys-green animate-bounce"
             style={{ animationDelay: `${i * 150}ms`, animationDuration: '800ms' }}
           />
         ))}
@@ -63,7 +63,7 @@ const SourcesPanel: React.FC<{ sources?: SourceItem[] }> = ({ sources }) => {
       <button
         onClick={() => setExpanded(v => !v)}
         className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest
-          text-muted-foreground hover:text-sys-cyan transition-colors w-full font-mono"
+          text-muted-foreground hover:text-sys-green transition-colors w-full font-mono"
       >
         <FileText className="w-3.5 h-3.5" />
         {sources.length} Source{sources.length > 1 ? 's' : ''} Retrieved
@@ -93,7 +93,7 @@ const SourceCard: React.FC<{ source: SourceItem }> = ({ source }) => {
   const thumbnailUrl = youtubeVideoId ? getYoutubeThumbnailUrl(youtubeVideoId, 'hq') : null;
 
   const inner = (
-    <div className="group flex flex-col gap-1.5 p-3 rounded-lg transition-all border border-sys-border hover:border-sys-cyan/25"
+    <div className="group flex flex-col gap-1.5 p-3 rounded-lg transition-all border border-sys-border hover:border-sys-green/25"
       style={{ background: 'rgba(17,24,39,0.7)' }}
     >
       <div className="flex items-center justify-between gap-2">
@@ -103,7 +103,7 @@ const SourceCard: React.FC<{ source: SourceItem }> = ({ source }) => {
           ) : isWeb ? (
             <Globe className="w-3.5 h-3.5 text-sky-400 shrink-0" />
           ) : (
-            <FileText className="w-3.5 h-3.5 text-sys-cyan shrink-0" />
+            <FileText className="w-3.5 h-3.5 text-sys-green shrink-0" />
           )}
           <span className="font-medium text-xs text-foreground truncate">
             {source.title ?? (isWeb ? source.url : 'Your Document')}
@@ -112,7 +112,7 @@ const SourceCard: React.FC<{ source: SourceItem }> = ({ source }) => {
         <div className="flex items-center gap-1.5 shrink-0">
           {source.score != null && (
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded font-mono"
-              style={{ background: 'rgba(0,229,255,0.1)', color: '#00E5FF' }}>
+              style={{ background: 'rgba(118,185,0,0.1)', color: '#76b900' }}>
               {Math.round(source.score * 100)}%
             </span>
           )}
@@ -121,17 +121,17 @@ const SourceCard: React.FC<{ source: SourceItem }> = ({ source }) => {
               ? 'text-red-400'
               : isWeb
               ? 'text-sky-400'
-              : 'text-sys-cyan'
+              : 'text-sys-green'
           }`} style={
             youtubeVideoId
               ? { background: 'rgba(239,68,68,0.1)' }
               : isWeb
               ? { background: 'rgba(56,189,248,0.1)' }
-              : { background: 'rgba(0,229,255,0.1)' }
+              : { background: 'rgba(118,185,0,0.1)' }
           }>
             {youtubeVideoId ? 'YT' : isWeb ? 'WEB' : 'DOC'}
           </span>
-          {isWeb && <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-sys-cyan transition-colors" />}
+          {isWeb && <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-sys-green transition-colors" />}
         </div>
       </div>
       {youtubeVideoId && thumbnailUrl && (
@@ -195,10 +195,10 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
           <div className={`w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold font-mono border ${
             isUser
               ? 'text-foreground border-sys-border'
-              : 'text-sys-cyan border-sys-cyan/30'
+              : 'text-sys-green border-sys-green/30'
           }`} style={isUser
             ? { background: 'rgba(255,255,255,0.06)' }
-            : { background: 'rgba(0,229,255,0.08)', boxShadow: '0 0 8px rgba(0,229,255,0.15)' }
+            : { background: 'rgba(118,185,0,0.08)', boxShadow: '0 0 8px rgba(118,185,0,0.15)' }
           }>
             {isUser ? <User className="w-3.5 h-3.5" /> : <Terminal className="w-3.5 h-3.5" />}
           </div>
@@ -208,27 +208,27 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
         <div className="flex-1 min-w-0 pb-6">
           {/* Role label */}
           <div className="flex items-center gap-2 mb-2 pt-2.5 flex-wrap">
-            <span className="system-label" style={{ color: isUser ? '#94A3B8' : '#00E5FF', fontSize: '10px' }}>
+            <span className="system-label" style={{ color: isUser ? '#94A3B8' : '#76b900', fontSize: '10px' }}>
               {isUser ? 'USER INPUT' : 'VAATHI · ASSISTANT'}
             </span>
             <span className="system-label" style={{ fontSize: '9px', opacity: 0.5 }}>
               {formatTimestamp(message.timestamp)}
             </span>
             {isStreaming && !isUser && (
-              <span className="system-label animate-pulse" style={{ color: '#00E5FF', fontSize: '9px' }}>
+              <span className="system-label animate-pulse" style={{ color: '#76b900', fontSize: '9px' }}>
                 ● STREAMING
               </span>
             )}
             {/* Model badge — shown as soon as we know which model ran */}
             {!isUser && message.modelUsed && (() => {
               const m = message.modelUsed;
-              const isGemini = m.startsWith('gemini');
-              const isGroq   = m === 'groq';
-              const isLlama  = m === 'llama3';
-              const bg    = isGemini ? 'rgba(99,102,241,0.15)' : isGroq ? 'rgba(249,115,22,0.15)' : 'rgba(34,197,94,0.15)';
-              const color = isGemini ? '#818CF8' : isGroq ? '#FB923C' : '#4ADE80';
-              const border = isGemini ? 'rgba(99,102,241,0.3)' : isGroq ? 'rgba(249,115,22,0.3)' : 'rgba(34,197,94,0.3)';
-              const label = isGemini ? 'Gemini 2.5 Flash' : isGroq ? 'Groq · Llama 3.3' : 'Llama 3 · Ollama';
+              const isGemini  = m.startsWith('gemini');
+              const isGroq    = m === 'groq';
+              const isNvidia  = m === 'nvidia';
+              const bg    = isGemini ? 'rgba(99,102,241,0.15)' : isGroq ? 'rgba(249,115,22,0.15)' : isNvidia ? 'rgba(118,185,0,0.15)' : 'rgba(34,197,94,0.15)';
+              const color = isGemini ? '#818CF8'              : isGroq ? '#FB923C'              : isNvidia ? '#76B900'              : '#4ADE80';
+              const border = isGemini ? 'rgba(99,102,241,0.3)' : isGroq ? 'rgba(249,115,22,0.3)' : isNvidia ? 'rgba(118,185,0,0.3)' : 'rgba(34,197,94,0.3)';
+              const label = isGemini ? 'Gemini 2.5 Flash' : isGroq ? 'Groq · Llama 3.3' : isNvidia ? 'NVIDIA · GLM-5.1' : m;
               return (
                 <span
                   className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-mono font-bold"
@@ -259,7 +259,7 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
             {/* Dot matrix top accent for AI message */}
             {!isUser && (
               <div className="absolute top-0 left-4 right-4 h-px"
-                style={{ background: 'linear-gradient(90deg, #00E5FF, transparent)' }} />
+                style={{ background: 'linear-gradient(90deg, #76b900, transparent)' }} />
             )}
 
             <div className={`${isUser ? '' : 'prose prose-invert max-w-none prose-sm'}`}>
@@ -267,7 +267,7 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
                 <div className="flex items-center gap-1.5 h-5">
                   {[0,1,2].map(i => (
                     <span key={i}
-                      className="w-1.5 h-1.5 rounded-full bg-sys-cyan animate-bounce"
+                      className="w-1.5 h-1.5 rounded-full bg-sys-green animate-bounce"
                       style={{ animationDelay: `${i * 150}ms`, animationDuration: '800ms' }}
                     />
                   ))}
@@ -332,8 +332,8 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
             <button
               onClick={handleCopy}
               className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-mono
-                text-muted-foreground hover:text-sys-cyan hover:bg-sys-cyan/8
-                transition-all border border-transparent hover:border-sys-cyan/20"
+                text-muted-foreground hover:text-sys-green hover:bg-sys-green/8
+                transition-all border border-transparent hover:border-sys-green/20"
               aria-label="Copy message"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-sys-success" /> : <Copy className="w-3.5 h-3.5" />}
