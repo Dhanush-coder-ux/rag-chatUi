@@ -7,26 +7,18 @@ import {
 import { useRagContext, RagMode, LlmModel } from '../context/RagContext';
 import { FileUploadButton } from './FileUploadButton';
 import { YoutubeUploadButton } from './YoutubeUploadButton';
-import { VoiceRecorderWS } from './VoiceRecorderWS';
+import { motion } from 'framer-motion';
 
 interface Props {
   onSubmit: (question: string) => void;
-  isRecording?: boolean;
-  isProcessing?: boolean;
-  startRecording?: () => void;
-  stopRecording?: () => void;
-  abortVoice?: () => void;
-  statusText?: string;
+  onStartLiveVoice?: () => void;  // Opens JARVIS live voice modal
+  isLiveActive?: boolean;          // Live voice session is running
 }
 
 export const ChatInput: React.FC<Props> = ({
   onSubmit,
-  isRecording = false,
-  isProcessing = false,
-  startRecording = () => { },
-  stopRecording = () => { },
-  abortVoice,
-  statusText = ''
+  onStartLiveVoice,
+  isLiveActive = false,
 }) => {
   const { isLoading, documents, mode, setMode, model, setModel, selectedDocumentIds, clearSelectedDocuments, stopGenerating } = useRagContext();
   const [value, setValue] = useState('');
@@ -82,6 +74,7 @@ export const ChatInput: React.FC<Props> = ({
     { value: 'gemini', label: 'Gemini 2.5 Flash', tag: 'GEMINI' },
     { value: 'groq', label: 'Groq (Llama 3.3 70B)', tag: 'GROQ' },
     { value: 'nvidia', label: 'NVIDIA · GLM-5.1 (NIM)', tag: 'NVIDIA' },
+    { value: 'nemotron', label: 'Nemotron 3 VoiceChat', tag: 'NEMOTRON' },
   ];
   const selectedModel = modelOptions.find(o => o.value === model) || modelOptions[0];
 
@@ -241,20 +234,57 @@ export const ChatInput: React.FC<Props> = ({
             style={{ minHeight: '36px' }}
           />
 
-          {/* Right: Voice + Send */}
+          {/* Right: Live Voice + Push-to-talk + Send */}
           <div className="shrink-0 flex items-center gap-1.5 mb-0.5">
-            <VoiceRecorderWS
-              isRecording={isRecording}
-              isProcessing={isProcessing}
-              startRecording={startRecording}
-              stopRecording={stopRecording}
-            />
 
-            {isLoading || isProcessing ? (
+            {/* JARVIS Live Voice button — cyan, opens continuous conversation */}
+            {onStartLiveVoice && (
+              <motion.button
+                type="button"
+                onClick={onStartLiveVoice}
+                disabled={isLiveActive || isLoading}
+                title="Live Voice Conversation (Nemotron)"
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                animate={isLiveActive ? {
+                  boxShadow: ['0 0 8px #00D4FF40', '0 0 20px #00D4FF70', '0 0 8px #00D4FF40'],
+                } : {}}
+                transition={isLiveActive ? { duration: 1.5, repeat: Infinity } : {}}
+                className="w-9 h-9 flex items-center justify-center rounded-lg border relative"
+                style={{
+                  background: isLiveActive
+                    ? 'rgba(0,212,255,0.18)'
+                    : 'rgba(0,212,255,0.08)',
+                  borderColor: isLiveActive
+                    ? 'rgba(0,212,255,0.7)'
+                    : 'rgba(0,212,255,0.3)',
+                  boxShadow: isLiveActive
+                    ? '0 0 16px rgba(0,212,255,0.5)'
+                    : '0 0 8px rgba(0,212,255,0.2)',
+                  cursor: isLiveActive ? 'not-allowed' : 'pointer',
+                  opacity: isLoading && !isLiveActive ? 0.5 : 1,
+                }}
+                aria-label="Start live voice conversation"
+              >
+                <Mic
+                  className="w-4 h-4"
+                  style={{ color: isLiveActive ? '#00D4FF' : '#00D4FF99' }}
+                />
+                {isLiveActive && (
+                  <motion.span
+                    animate={{ scale: [1, 1.7], opacity: [0.7, 0] }}
+                    transition={{ duration: 1.1, repeat: Infinity }}
+                    className="absolute inset-0 rounded-lg border"
+                    style={{ borderColor: '#00D4FF' }}
+                  />
+                )}
+              </motion.button>
+            )}
+
+            {isLoading ? (
               <button
                 onClick={() => {
-                  if (isProcessing && abortVoice) abortVoice();
-                  else if (isLoading) stopGenerating();
+                  if (isLoading) stopGenerating();
                 }}
                 className="w-9 h-9 flex items-center justify-center rounded-lg border transition-colors"
                 style={{
@@ -298,7 +328,6 @@ export const ChatInput: React.FC<Props> = ({
             <span className="w-1.5 h-1.5 rounded-full bg-sys-success" />
             <span className="system-label" style={{ fontSize: '9px' }}>
               VAATHI · {mode.toUpperCase()} MODE
-              {statusText && ` · ${statusText}`}
             </span>
           </div>
           <span className="system-label" style={{ fontSize: '9px' }}>

@@ -225,10 +225,11 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
               const isGemini  = m.startsWith('gemini');
               const isGroq    = m === 'groq';
               const isNvidia  = m === 'nvidia';
-              const bg    = isGemini ? 'rgba(99,102,241,0.15)' : isGroq ? 'rgba(249,115,22,0.15)' : isNvidia ? 'rgba(118,185,0,0.15)' : 'rgba(34,197,94,0.15)';
-              const color = isGemini ? '#818CF8'              : isGroq ? '#FB923C'              : isNvidia ? '#76B900'              : '#4ADE80';
-              const border = isGemini ? 'rgba(99,102,241,0.3)' : isGroq ? 'rgba(249,115,22,0.3)' : isNvidia ? 'rgba(118,185,0,0.3)' : 'rgba(34,197,94,0.3)';
-              const label = isGemini ? 'Gemini 2.5 Flash' : isGroq ? 'Groq · Llama 3.3' : isNvidia ? 'NVIDIA · GLM-5.1' : m;
+              const isNemotron = m === 'nemotron';
+              const bg    = isGemini ? 'rgba(99,102,241,0.15)' : isGroq ? 'rgba(249,115,22,0.15)' : isNemotron ? 'rgba(0,212,255,0.15)' : isNvidia ? 'rgba(118,185,0,0.15)' : 'rgba(34,197,94,0.15)';
+              const color = isGemini ? '#818CF8'              : isGroq ? '#FB923C'              : isNemotron ? '#00D4FF'              : isNvidia ? '#76B900'              : '#4ADE80';
+              const border = isGemini ? 'rgba(99,102,241,0.3)' : isGroq ? 'rgba(249,115,22,0.3)' : isNemotron ? 'rgba(0,212,255,0.3)' : isNvidia ? 'rgba(118,185,0,0.3)' : 'rgba(34,197,94,0.3)';
+              const label = isGemini ? 'Gemini 2.5 Flash' : isGroq ? 'Groq · Llama 3.3' : isNemotron ? 'Nemotron 3 VoiceChat' : isNvidia ? 'NVIDIA · GLM-5.1' : m;
               return (
                 <span
                   className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-mono font-bold"
