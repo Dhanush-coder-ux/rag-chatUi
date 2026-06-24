@@ -13,10 +13,10 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
 
   return (
     <header className="shrink-0 w-full relative z-10" style={{
-      background: 'rgba(15,23,42,0.85)',
+      background: 'rgba(0,0,0,0.85)',
       backdropFilter: 'blur(20px)',
       WebkitBackdropFilter: 'blur(20px)',
-      borderBottom: '1px solid rgba(30,41,59,0.8)',
+      borderBottom: '1px solid rgba(17,17,17,0.8)',
       boxShadow: '0 1px 0 rgba(118,185,0,0.06), 0 4px 24px rgba(0,0,0,0.4)',
     }}>
       {/* Active processing glow bar */}

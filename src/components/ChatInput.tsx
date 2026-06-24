@@ -127,7 +127,7 @@ export const ChatInput: React.FC<Props> = ({
             <div className="absolute right-0 bottom-full mb-2 w-52 py-1.5 rounded-xl z-50
               border border-sys-border shadow-premium-dark overflow-hidden
               animate-in fade-in zoom-in-95 duration-150"
-              style={{ background: '#0F172A', backdropFilter: 'blur(20px)' }}>
+              style={{ background: '#000000', backdropFilter: 'blur(20px)' }}>
               <div className="px-3 pb-1.5">
                 <p className="system-label" style={{ fontSize: '9px' }}>SELECT AI ENGINE</p>
               </div>
@@ -191,7 +191,7 @@ export const ChatInput: React.FC<Props> = ({
       <div
         className="relative flex flex-col rounded-xl border transition-all duration-300 z-10"
         style={{
-          background: 'rgba(17,24,39,0.85)',
+          background: 'rgba(0,0,0,0.85)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           borderColor: isFocused ? 'rgba(118,185,0,0.35)' : '#1E293B',

@@ -46,14 +46,14 @@ export const PdfViewer: React.FC<Props> = ({ url, filename, onClose }) => {
           fullscreen ? 'fixed inset-4' : 'w-full max-w-4xl max-h-[92vh]'
         }`}
         style={{
-          background: 'rgba(15,23,42,0.97)',
+          background: 'rgba(0,0,0,0.97)',
           boxShadow: '0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(118,185,0,0.08)',
         }}
       >
         {/* ── Header ──────────────────────────────────────────────────────────── */}
         <div
           className="flex items-center justify-between px-5 py-3.5 border-b border-sys-border shrink-0"
-          style={{ background: 'rgba(17,24,39,0.9)' }}
+          style={{ background: 'rgba(0,0,0,0.9)' }}
         >
           <div className="flex items-center gap-3 min-w-0">
             <div
@@ -102,7 +102,7 @@ export const PdfViewer: React.FC<Props> = ({ url, filename, onClose }) => {
         {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
         <div
           className="flex items-center justify-between px-5 py-2 border-b border-sys-border/50 shrink-0"
-          style={{ background: 'rgba(15,23,42,0.8)' }}
+          style={{ background: 'rgba(0,0,0,0.8)' }}
         >
           {/* Page nav */}
           <div className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export const PdfViewer: React.FC<Props> = ({ url, filename, onClose }) => {
         {numPages > 1 && (
           <div
             className="border-t border-sys-border/50 px-4 py-2 flex gap-2 overflow-x-auto scrollbar-thin shrink-0"
-            style={{ background: 'rgba(15,23,42,0.9)' }}
+            style={{ background: 'rgba(0,0,0,0.9)' }}
           >
             {Array.from({ length: Math.min(numPages, 20) }, (_, i) => i + 1).map(p => (
               <button

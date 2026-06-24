@@ -145,7 +145,7 @@ export const Dashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
             className="p-5 rounded-xl border border-sys-border"
-            style={{ background: 'rgba(17,24,39,0.8)' }}
+            style={{ background: 'rgba(0,0,0,0.8)' }}
           >
             <div className="flex items-center gap-2 mb-4">
               <div className="w-2 h-2 rounded-full bg-sys-success animate-pulse" />
@@ -184,7 +184,7 @@ export const Dashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
             className="p-5 rounded-xl border border-sys-border"
-            style={{ background: 'rgba(17,24,39,0.8)' }}
+            style={{ background: 'rgba(0,0,0,0.8)' }}
           >
             <div className="flex items-center gap-2 mb-4">
               <Zap className="w-3.5 h-3.5 text-sys-green" />

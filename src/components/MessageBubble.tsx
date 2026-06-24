@@ -94,7 +94,7 @@ const SourceCard: React.FC<{ source: SourceItem }> = ({ source }) => {
 
   const inner = (
     <div className="group flex flex-col gap-1.5 p-3 rounded-lg transition-all border border-sys-border hover:border-sys-green/25"
-      style={{ background: 'rgba(17,24,39,0.7)' }}
+      style={{ background: 'rgba(0,0,0,0.7)' }}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
@@ -246,7 +246,7 @@ export const MessageBubble: React.FC<Props> = memo(({ message, onRegenerate, isL
           {/* Tool steps (before content loads) */}
           {showTools && isStreaming && isEmpty && (
             <div className="flex flex-col gap-1 mb-3 px-3 py-2 rounded-lg border border-sys-border"
-              style={{ background: 'rgba(17,24,39,0.6)' }}>
+              style={{ background: 'rgba(0,0,0,0.6)' }}>
               <p className="system-label mb-1.5" style={{ fontSize: '9px' }}>PIPELINE EXECUTION</p>
               {message.tools!.map(t => <ToolStep key={t.id} tool={t} />)}
             </div>

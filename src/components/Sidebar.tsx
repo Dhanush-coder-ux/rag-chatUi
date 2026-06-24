@@ -77,7 +77,7 @@ const FileEntry: React.FC<{
         style={{ background: 'rgba(17,24,39,0.9)' }}
       >
         {/* Thumbnail */}
-        <div className="relative w-full aspect-video bg-zinc-900 overflow-hidden">
+        <div className="relative w-full aspect-video bg-black overflow-hidden">
           {thumbnailUrl && (
             <img
               src={thumbnailUrl}
@@ -377,7 +377,7 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKno
         ${open ? 'translate-x-0' : '-translate-x-full'}
       `}
         style={{
-          background: 'rgba(15,23,42,0.92)',
+          background: 'rgba(0,0,0,0.92)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           boxShadow: '4px 0 24px rgba(0,0,0,0.5), inset -1px 0 0 rgba(118,185,0,0.05)',
@@ -396,8 +396,7 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKno
                   style={{ background: 'rgba(118,185,0,0.08)', boxShadow: '0 0 12px rgba(118,185,0,0.2)' }}>
                   <img src="/images/vaathi.png" alt="Vaathi" className="w-full h-full object-contain p-1" />
                 </div>
-                {/* Status pulse */}
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-sys-success border-2 border-[#0F172A] status-ping" />
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-sys-success border-2 border-[#000000] status-ping" />
               </div>
 
               <div>

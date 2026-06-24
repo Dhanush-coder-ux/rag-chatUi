@@ -79,7 +79,7 @@ const PdfCard: React.FC<{
             ? 'border-sys-green/40 ring-1 ring-sys-green/20 cursor-pointer'
             : 'border-sys-border hover:border-red-400/30 cursor-pointer'
       }`}
-      style={{ background: 'rgba(17,24,39,0.9)' }}
+      style={{ background: 'rgba(0,0,0,0.9)' }}
       onClick={isFailed ? undefined : onToggle}
     >
       {/* PDF first-page thumbnail */}
@@ -203,7 +203,7 @@ const YoutubeCard: React.FC<{
             ? 'border-sys-green/40 ring-1 ring-sys-green/20 cursor-pointer'
             : 'border-sys-border hover:border-red-500/30 cursor-pointer'
       }`}
-      style={{ background: 'rgba(17,24,39,0.9)' }}
+      style={{ background: 'rgba(0,0,0,0.9)' }}
       onClick={isFailed ? undefined : onToggle}
     >
       <div className="relative w-full aspect-video bg-zinc-900 overflow-hidden">
@@ -498,7 +498,7 @@ export const KnowledgeBasePage: React.FC<Props> = memo(({ onClose }) => {
               className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-foreground
                 placeholder-muted-foreground outline-none transition-all border"
               style={{
-                background: 'rgba(17,24,39,0.8)',
+                background: 'rgba(0,0,0,0.8)',
                 borderColor: search ? 'rgba(118,185,0,0.3)' : '#1E293B',
               }}
             />
@@ -648,7 +648,7 @@ export const KnowledgeBasePage: React.FC<Props> = memo(({ onClose }) => {
         {/* ── Footer status bar ────────────────────────────────────────────── */}
         <div
           className="border-t border-sys-border px-8 py-3 shrink-0 flex items-center justify-between"
-          style={{ background: 'rgba(15,23,42,0.9)' }}
+          style={{ background: 'rgba(0,0,0,0.9)' }}
         >
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-sys-success animate-pulse" />

@@ -365,7 +365,7 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({
                 <div style={{
                   position: 'relative',
                   padding: '20px 28px',
-                  background: 'linear-gradient(135deg, rgba(15,23,42,0.6) 0%, rgba(2,8,20,0.8) 100%)',
+                  background: 'linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.8) 100%)',
                   backdropFilter: 'blur(16px)',
                   border: `1px solid ${cfg.color}30`,
                   borderRadius: '16px',
@@ -420,7 +420,7 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({
                 <div style={{
                   position: 'relative',
                   padding: '20px 28px',
-                  background: 'linear-gradient(135deg, rgba(15,23,42,0.7) 0%, rgba(2,8,20,0.9) 100%)',
+                  background: 'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%)',
                   backdropFilter: 'blur(16px)',
                   border: `1px solid #A78BFA30`, /* Nemotron purple accent */
                   borderRadius: '16px',
