@@ -48,7 +48,7 @@ export default {
         'sys-green-dim': '#4A7A00',
         'sys-surface': '#000000',
         'sys-card':    '#000000',
-        'sys-border':  '#111111',
+        'sys-border':  '#2A2A2A',
         'sys-bg':      '#000000',
         'sys-success': '#22C55E',
         'sys-warning': '#F59E0B',

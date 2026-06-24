@@ -45,17 +45,73 @@ function StatusBadge({ status }: { status: DocType['status'] }) {
   }
   if (status === 'processing') {
     return (
-      <div
-        className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded z-10"
-        style={{ background: 'rgba(118,185,0,0.15)', border: '1px solid rgba(118,185,0,0.3)' }}
-      >
-        <Loader2 className="w-2.5 h-2.5 text-sys-green animate-spin" />
-        <span className="text-[9px] font-bold text-sys-green font-mono">PROCESSING</span>
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center"
+           style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)' }}>
+        <div className="relative flex items-center justify-center w-12 h-12 mb-3">
+           <div className="absolute inset-0 rounded-full border-2 border-sys-green/30 border-t-sys-green animate-spin" />
+           <div className="absolute inset-2 rounded-full border-2 border-sys-green/20 border-b-sys-green animate-[spin_1.5s_linear_infinite_reverse]" />
+           <Loader2 className="w-4 h-4 text-sys-green animate-pulse" />
+        </div>
+        <span className="text-[10px] font-bold text-sys-green font-mono tracking-widest animate-pulse">PROCESSING</span>
       </div>
     );
   }
   return null;
 }
+
+const AnimatedProcessingBanner: React.FC<{ count: number }> = ({ count }) => {
+  const [dots, setDots] = useState('');
+  useEffect(() => {
+    const i = setInterval(() => setDots(p => p.length >= 3 ? '' : p + '.'), 400);
+    return () => clearInterval(i);
+  }, []);
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-sys-green/40 shadow-glow-green-lg transition-all"
+         style={{ background: 'linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(10,20,10,1) 100%)' }}>
+      
+      {/* Animated glowing background layer */}
+      <div className="absolute inset-0 bg-sys-green/10 animate-pulse-green opacity-30" />
+      
+      {/* Animated scanline */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="w-full h-[2px] bg-sys-green/60 blur-[1px] animate-scan-line shadow-[0_0_10px_#76b900]" />
+      </div>
+
+      <div className="relative z-10 flex items-center justify-between px-6 py-4">
+        <div className="flex items-center gap-5">
+          <div className="relative flex items-center justify-center w-12 h-12 rounded-full bg-black shadow-inner">
+            <Database className="w-5 h-5 text-sys-green animate-pulse" />
+            <div className="absolute inset-0 rounded-full border border-sys-green/50 animate-[spin_3s_linear_infinite] border-t-transparent border-r-transparent" />
+            <div className="absolute -inset-1 rounded-full border border-sys-green/30 animate-[spin_2s_linear_infinite_reverse] border-b-transparent border-l-transparent" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-white tracking-wide uppercase font-mono flex items-center gap-2">
+              Ingesting Data
+              <span className="flex items-center gap-0.5">
+                <span className="w-1 h-1 rounded-full bg-sys-green animate-ping" />
+              </span>
+            </h3>
+            <p className="text-xs text-sys-green font-mono mt-1 opacity-90">
+              Vectorizing {count} document{count > 1 ? 's' : ''} in secure pipeline{dots}
+            </p>
+          </div>
+        </div>
+
+        {/* Dynamic progress bar right side */}
+        <div className="flex flex-col items-end gap-2 w-32 hidden sm:flex">
+          <span className="text-[9px] font-mono tracking-widest text-sys-green/80 animate-pulse">
+            EMBEDDING ACTIVE
+          </span>
+          <div className="h-1.5 w-full bg-black rounded-full overflow-hidden border border-sys-green/20 relative">
+            <div className="absolute inset-0 w-[50%] bg-gradient-to-r from-transparent via-sys-green to-transparent opacity-80 animate-[shimmer_1.5s_infinite] bg-[length:200%_100%]" />
+            <div className="absolute inset-0 bg-sys-green/20 w-full animate-pulse" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ── PDF Thumbnail card ───────────────────────────────────────────────────────
 const PdfCard: React.FC<{
@@ -508,17 +564,9 @@ export const KnowledgeBasePage: React.FC<Props> = memo(({ onClose }) => {
         {/* ── Content ───────────────────────────────────────────────────────── */}
         <div className="flex-1 overflow-y-auto px-8 py-6 space-y-8 scrollbar-thin">
 
-          {/* Processing indicator */}
+          {/* Premium Animated Processing Banner */}
           {processingTasks.length > 0 && (
-            <div
-              className="flex items-center gap-3 px-4 py-3 rounded-xl border border-sys-green/30"
-              style={{ background: 'rgba(118,185,0,0.05)' }}
-            >
-              <Loader2 className="w-4 h-4 text-sys-green animate-spin shrink-0" />
-              <p className="text-sm text-sys-green font-medium">
-                {processingTasks.length} document{processingTasks.length > 1 ? 's' : ''} processing…
-              </p>
-            </div>
+            <AnimatedProcessingBanner count={processingTasks.length} />
           )}
 
           {/* Failed documents banner */}

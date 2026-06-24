@@ -16,7 +16,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
       background: 'rgba(0,0,0,0.85)',
       backdropFilter: 'blur(20px)',
       WebkitBackdropFilter: 'blur(20px)',
-      borderBottom: '1px solid rgba(17,17,17,0.8)',
+      borderBottom: '1px solid #2A2A2A',
       boxShadow: '0 1px 0 rgba(118,185,0,0.06), 0 4px 24px rgba(0,0,0,0.4)',
     }}>
       {/* Active processing glow bar */}
@@ -31,18 +31,17 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ sidebarOpen, onToggleSid
       <div className="flex items-center gap-4 px-4 py-3">
         {/* ── Left: Sidebar toggle + Brand ─────────────────────────────────── */}
         <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={onToggleSidebar}
-            aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg
-              text-muted-foreground hover:text-sys-green hover:bg-sys-green/8
-              transition-all duration-200 border border-transparent hover:border-sys-green/20"
-          >
-            {sidebarOpen
-              ? <PanelLeftClose className="w-4 h-4" />
-              : <PanelLeft className="w-4 h-4" />
-            }
-          </button>
+          {!sidebarOpen && (
+            <button
+              onClick={onToggleSidebar}
+              aria-label="Open sidebar"
+              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg
+                text-muted-foreground hover:text-sys-green hover:bg-sys-green/8
+                transition-all duration-200 border border-transparent hover:border-sys-green/20"
+            >
+              <PanelLeft className="w-4 h-4" />
+            </button>
+          )}
 
           <div className="flex flex-col leading-none">
             <div className="flex items-center gap-2">

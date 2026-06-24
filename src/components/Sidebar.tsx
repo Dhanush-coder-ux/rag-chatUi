@@ -372,7 +372,7 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKno
 
       <aside className={`
         fixed top-0 left-0 h-full z-30 flex flex-col w-[280px]
-        border-r border-sys-border
+        border-r border-[#2A2A2A]
         transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
         ${open ? 'translate-x-0' : '-translate-x-full'}
       `}
@@ -387,7 +387,7 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKno
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-sys-green/30 to-transparent" />
 
         {/* ── AI Identity Header ──────────────────────────────────────────── */}
-        <div className="relative px-4 pt-5 pb-4 shrink-0 border-b border-sys-border">
+        <div className="relative px-4 pt-5 pb-4 shrink-0 border-b border-[#2A2A2A]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* Logo / Pulse */}
@@ -462,7 +462,7 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKno
         </div>
 
         {/* ── Knowledge Base ──────────────────────────────────────────────── */}
-        <div className="border-t border-sys-border flex flex-col shrink-0">
+        <div className="border-t border-[#2A2A2A] flex flex-col shrink-0">
           <button
             onClick={() => setSourcesOpen(o => !o)}
             className="flex items-center justify-between w-full px-4 py-3 transition-colors group"
@@ -546,7 +546,7 @@ export const Sidebar: React.FC<Props> = memo(({ open, onClose, onOpen, onOpenKno
         </div>
 
         {/* ── Footer — User Profile ────────────────────────────────────────── */}
-        <div className="border-t border-sys-border px-4 py-3 shrink-0 flex items-center gap-3">
+        <div className="border-t border-[#2A2A2A] px-4 py-3 shrink-0 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[#020617] text-xs font-bold shrink-0"
             style={{
               background: 'linear-gradient(135deg, #76b900, #4A7A00)',
